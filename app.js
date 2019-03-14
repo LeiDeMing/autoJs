@@ -33,7 +33,7 @@ async function browserPage(_url,str){
     aList.each((i,val)=>{
         let _random=Math.random()*10;
         _random>5 && (process.nextTick(()=>{
-            utils.gotoPage(`https://${_host}/${val.attribs.href}`);
+            utils.gotoPage(`https://${_host}${val.attribs.href}`);
         }))
     })
 }
