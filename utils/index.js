@@ -17,7 +17,7 @@ function setSchedule(date, callback) {
 }
 
 async function gotoPage(_url){
-    const browser=await puppeteer.launch();
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     const page=await browser.newPage();
     await page.goto(_url);
     console.log('执行完毕');
