@@ -21,16 +21,22 @@ async function gotoPage(aList,_host){
     let pageArr=[];
     // let page=await browser.newPage();
     // await page.goto(_url);
-    for(let x=0,len=aList.length;x<len;x++){
-        let random=Math.random()*10;
-        if(random<5) continue;
-        pageArr[x]=await browser.newPage();
-        await pageArr[x].goto(`https://${_host}${aList[x].attribs.href}`);
-        console.log('执行完毕');
-        await pageArr[x].close();
+    try{
+        for(let x=0,len=aList.length;x<len;x++){
+            let random=Math.random()*10;
+            if(random<5) continue;
+            pageArr[x]=await browser.newPage();
+            await pageArr[x].goto(`https://${_host}${aList[x].attribs.href}`);
+            console.log('执行完毕');
+            await pageArr[x].close();
+        }
+        await browser.close();
+    }catch(e){
+        console.log(e);
+        await browser.close();
+    }finally{
+        await browser.close();
     }
-    await browser.close();
-    browser=null; //修复Ubuntu内存溢出bug
 }
 
 function setSuperagent(_url,_method,_data,_params,_cookies){
