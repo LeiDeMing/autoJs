@@ -30,7 +30,7 @@ async function gotoPage(aList,_host){
         await pageArr[x].close();
     }
     await browser.close();
-    browser=null;
+    browser=null; //修复Ubuntu内存溢出bug
 }
 
 function setSuperagent(_url,_method,_data,_params,_cookies){
