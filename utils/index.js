@@ -17,7 +17,7 @@ function setSchedule(date, callback) {
 }
 
 async function gotoPage(aList,_host){
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    let browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     let pageArr=[];
     // let page=await browser.newPage();
     // await page.goto(_url);
@@ -30,6 +30,7 @@ async function gotoPage(aList,_host){
         await pageArr[x].close();
     }
     await browser.close();
+    browser=null;
 }
 
 function setSuperagent(_url,_method,_data,_params,_cookies){
