@@ -30,12 +30,11 @@ async function browserPage(_url,str){
     const $ = cheerio.load(_res.text);
     const aList = $(str);
     const {req:{socket:{_host}}}=_res;
-    aList.each((i,val)=>{
-        let _random=Math.random()*10;
-        _random>5 && (process.nextTick(()=>{
-            utils.gotoPage(`https://${_host}${val.attribs.href}`);
-        }))
-    })
+    // aList.each((i,val)=>{
+    //     let _random=Math.random()*10;
+    //     _random>5 && utils.gotoPage(`https://${_host}${val.attribs.href}`);
+    // });
+    utils.gotoPage(aList,_host);
 }
 
 // browserPage(config._selfBlog,'.post-title-link');

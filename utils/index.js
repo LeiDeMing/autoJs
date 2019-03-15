@@ -16,11 +16,19 @@ function setSchedule(date, callback) {
     schedule.scheduleJob(date, callback);
 }
 
-async function gotoPage(_url){
+async function gotoPage(aList,_host){
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-    const page=await browser.newPage();
-    await page.goto(_url);
-    console.log('执行完毕');
+    let pageArr=[];
+    // let page=await browser.newPage();
+    // await page.goto(_url);
+    for(let x=0,len=aList.length;x<len;x++){
+        let random=Math.random()*10;
+        if(random<5) continue;
+        pageArr[x]=await browser.newPage();
+        await pageArr[x].goto(`https://${_host}${aList[x].attribs.href}`);
+        console.log('执行完毕');
+        await pageArr[x].close();
+    }
     await browser.close();
 }
 
