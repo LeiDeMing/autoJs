@@ -4,8 +4,8 @@ const express = require('express'),
     cheerio = require('cheerio');
 const admin = require('./router/admin.js'),
     setSchedule = require('./middlewares/setSchedule'),
-    gotoPage = require('./controllers/gotoPage'),
-    setSuperagent = require('./controllers/setSuperagent');
+    agent=require('./middlewares/agent')
+    gotoPage = require('./controllers/gotoPage');
 let config = require('./config/index');
 
 app.use(bodyParser.urlencoded({
@@ -22,13 +22,9 @@ app.use('*', function (req, res) {
     res.render('403');
 })
 
-async function _agent(url) {
-    const res = await setSuperagent(url);
-    return res
-}
 
 async function browserPage(_url, str) {
-    const _res = await _agent(_url);
+    const _res = await agent(_url);
     const $ = cheerio.load(_res.text);
     const aList = $(str);
     const {
@@ -38,10 +34,6 @@ async function browserPage(_url, str) {
             }
         }
     } = _res;
-    // aList.each((i,val)=>{
-    //     let _random=Math.random()*10;
-    //     _random>5 && utils.gotoPage(`https://${_host}${val.attribs.href}`);
-    // });
     gotoPage(aList, _host);
 }
 
