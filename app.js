@@ -37,13 +37,10 @@ async function browserPage(_url,str){
     utils.gotoPage(aList,_host);
 }
 
-// browserPage(config._selfBlog,'.post-title-link');
-// browserPage(config._juejinUrl,'.abstract-row .title')
-
-utils.setSchedule(config._date, async () => {
-    browserPage(config._selfBlog,'.post-title-link');
-    browserPage(config._juejinUrl,'.abstract-row .title');
-})
+// utils.setSchedule(config._date, async () => {
+//     browserPage(config._selfBlog,'.post-title-link');
+//     browserPage(config._juejinUrl,'.abstract-row .title');
+// })
 
 console.log(`服务开启，端口${config._port}`)
 app.listen(config._port);
