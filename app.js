@@ -23,11 +23,13 @@ app.use('*', function (req, res) {
     res.render('403');
 })
 
-// setSchedule(config.date, async () => {
-//     // getHtml(config.selfBlog, '.post-title-link',gotoPage);
-//     // getHtml(config.juejinUrl, '.abstract-row .title',gotoPage);
-// })
-getDyttMovie();
+setSchedule(config.date, async () => {
+    getHtml(config.selfBlog, '.post-title-link',gotoPage);
+    getHtml(config.juejinUrl, '.abstract-row .title',gotoPage);
+});
+setSchedule('1 1 8 * * *', async () => {
+    getDyttMovie();
+});
 // console.log(`https://movie.douban.com/j/subject_suggest?q=${encodeURI('叶问外传')}`)
 
 console.log(`服务开启，端口${config.port}`)
