@@ -1,19 +1,32 @@
-const getDownLink=require('../middlewares/getDownLink');
-
+const getDownLink=require('../middlewares/getDownLink'),
+        utils=require('./index'),
+        client=require('../common/redis');
 
 async function getDyttMovie(){
-    const movieList=await getDownLink('https://www.dytt8.net/','.co_content2>ul a');
+    const $home=await getDownLink({
+        url:'https://www.dytt8.net/',
+        charset:'gbk'
+    });
+    const movieList=$home('.co_content2>ul a');
     const movieArr=[];
     for(let x=0,len=movieList.length;x<len;x++){
-        let targetMovie=await getDownLink(`https://www.dytt8.net${movieList[x].attribs.href}`,'td[bgcolor] a');
-        let title=await getDownLink(`https://www.dytt8.net${movieList[x].attribs.href}`,'h1 font');
-        movieArr.push({
-            title:title && title.eq(0).text(),
-            link:targetMovie && targetMovie[0] && targetMovie[0].attribs.href
+        if(utils.getObjLen(movieList[x].attribs)===0 ) continue;
+        let $list=await getDownLink({
+            url:`https://www.dytt8.net${movieList[x].attribs.href}`,
+            charset:'gbk'
         });
-        console.log(movieArr)
+        let targetMovie=$list('td[bgcolor] a');
+        let title=$list('h1 font');
+        let img=$list('#Zoom>span img');
+        targetMovie.length>0 &&  movieArr.push({
+            title:title && title.eq(0).text(),
+            link:targetMovie[0].attribs.href,
+            img:img.map((i,val)=>{
+                return val.attribs.src
+            })
+        });
     }
-    
+    client.sadd('dytt',movieArr);
 }
 
 

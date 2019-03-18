@@ -5,7 +5,7 @@ log4js.configure({
     appenders: {
         cheese: {
             type: 'file',
-            filename: `${config._log}cheese.log`
+            filename: `${config.log}cheese.log`
         }
     },
     categories: {
@@ -15,5 +15,5 @@ log4js.configure({
         }
     }
 });
-
-module.exports=log4js
+const logger = log4js.getLogger('cheese');
+module.exports=logger

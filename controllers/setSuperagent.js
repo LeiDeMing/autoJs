@@ -1,14 +1,18 @@
-const superagent = require('superagent');
-const log4js=require('../common/log');
-const logger = log4js.getLogger('cheese');
+// const superagent = require('superagent');
+const logger=require('../common/log');
+const charset = require('superagent-charset');
+const superagent = charset(require('superagent'));
 
-function setSuperagent(_url, _method, _data, _params, _cookies) {
-    _method = _method || 'get';
+function setSuperagent(options) {
+    let {url, method, data, params, cookies,charset}=options;
+    method = method || 'get';
     return new Promise((resolve, reject) => {
-        superagent(_method, _url)
-            .query(_params)
-            .send(_data)
+        superagent(method, url)
+            .query(params)
+            .send(data)
             .set('Content-Type', 'application/x-www-form-urlencoded')
+            .charset(charset || 'utf-8')
+            .buffer(true)
             .end((err, res) => {
                 if (err){
                     logger.error(err);

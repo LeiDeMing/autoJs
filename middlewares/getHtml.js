@@ -1,8 +1,8 @@
 const cheerio = require('cheerio');
 const setSuperagent = require('../controllers/setSuperagent');
 
-async function getHtml(_url, str, callback) {
-    const _res = await setSuperagent(_url);
+async function getHtml(url, str, callback) {
+    const _res = await setSuperagent({url});
     const $ = cheerio.load(_res.text);
     const aList = $(str);
     const {
