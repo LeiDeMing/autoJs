@@ -1,5 +1,6 @@
 const superagent = require('superagent');
 const log4js=require('../common/log');
+const logger = log4js.getLogger('cheese');
 
 function setSuperagent(_url, _method, _data, _params, _cookies) {
     _method = _method || 'get';
@@ -10,7 +11,7 @@ function setSuperagent(_url, _method, _data, _params, _cookies) {
             .set('Content-Type', 'application/x-www-form-urlencoded')
             .end((err, res) => {
                 if (err){
-                    log4js.error(err);
+                    logger.error(err);
                     reject(err);
                 }
                 resolve(res);

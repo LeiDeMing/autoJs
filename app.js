@@ -1,11 +1,11 @@
 const express = require('express'),
     app = express(),
-    bodyParser = require('body-parser'),
-    cheerio = require('cheerio');
+    bodyParser = require('body-parser');
 const admin = require('./router/admin.js'),
     setSchedule = require('./middlewares/setSchedule'),
-    agent=require('./middlewares/agent')
-    gotoPage = require('./controllers/gotoPage');
+    gotoPage = require('./controllers/gotoPage'),
+    getHtml=require('./middlewares/getHtml'),
+    getDyttMovie=require('./utils/dytt');
 let config = require('./config/index');
 
 app.use(bodyParser.urlencoded({
@@ -22,28 +22,12 @@ app.use('*', function (req, res) {
     res.render('403');
 })
 
-
-async function browserPage(_url, str) {
-    const _res = await agent(_url);
-    const $ = cheerio.load(_res.text);
-    const aList = $(str);
-    const {
-        req: {
-            socket: {
-                _host
-            }
-        }
-    } = _res;
-    gotoPage(aList, _host);
-}
-
-// browserPage(config._selfBlog,'.post-title-link');
-// browserPage(config._juejinUrl,'.abstract-row .title')
-
-setSchedule(config._date, async () => {
-    browserPage(config._selfBlog, '.post-title-link');
-    browserPage(config._juejinUrl, '.abstract-row .title');
-})
+// setSchedule(config._date, async () => {
+//     // getHtml(config._selfBlog, '.post-title-link',gotoPage);
+//     // getHtml(config._juejinUrl, '.abstract-row .title',gotoPage);
+// })
+getDyttMovie();
+// console.log(`https://movie.douban.com/j/subject_suggest?q=${encodeURI('叶问外传')}`)
 
 console.log(`服务开启，端口${config._port}`)
 app.listen(config._port);

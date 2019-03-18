@@ -6,7 +6,7 @@ async function gotoPage(aList, _host) {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     let pageArr = [];
-    const logger = log4js.getLogger('cheese')
+    const logger = log4js.getLogger('cheese');
     // let page=await browser.newPage();
     // await page.goto(_url);
     try {
