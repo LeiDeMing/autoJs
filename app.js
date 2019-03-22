@@ -4,8 +4,9 @@ const express = require('express'),
 const admin = require('./router/admin.js'),
     setSchedule = require('./middlewares/setSchedule'),
     gotoPage = require('./controllers/gotoPage'),
-    getHtml=require('./middlewares/getHtml'),
-    getDyttMovie=require('./utils/dytt');
+    getHtml = require('./middlewares/getHtml'),
+    getDyttMovie = require('./utils/dytt'),
+    email = require('./utils/email');
 let config = require('./config/index');
 
 app.use(bodyParser.urlencoded({
@@ -24,13 +25,30 @@ app.use('*', function (req, res) {
 })
 
 setSchedule(config.date, async () => {
-    getHtml(config.selfBlog, '.post-title-link',gotoPage);
-    getHtml(config.juejinUrl, '.abstract-row .title',gotoPage);
+    getHtml(config.selfBlog, '.post-title-link', gotoPage);
+    getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
 });
 setSchedule('1 1 8 * * *', async () => {
-    getDyttMovie();
+    getDyttMovie()
+        .then(res => {
+            let html = ''
+            res.forEach((curr, index) => {
+                html += `
+            <div>
+                <a href="${curr.link}">${curr.title}</a>
+            </div>
+            `
+            })
+            email.setEmail({
+                from: '2623024110@qq.com',
+                to: '136371773@qq.com',
+                subject: '最新电影(来自Nei服务器)',
+                html: html
+            })
+        })
 });
-// console.log(`https://movie.douban.com/j/subject_suggest?q=${encodeURI('叶问外传')}`)
+
+
 
 console.log(`服务开启，端口${config.port}`)
 app.listen(config.port);

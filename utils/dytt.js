@@ -25,8 +25,10 @@ async function getDyttMovie(){
                 return val.attribs.src
             })
         });
+        if(x===4) break;
     }
     client.sadd('dytt',movieArr);
+    return movieArr;
 }
 
 
