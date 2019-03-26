@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const config =require('../config/index');
+const logger = require('../common/log');
 // const smtpTransport = require('nodemailer-smtp-transport');
 
 let transporter = nodemailer.createTransport({
@@ -24,9 +25,9 @@ async function setEmail(options) {
 
     try {
         let info=await transporter.sendMail(mailOptions);
-        console.log(info)
+        logger.info(info)
     }catch(e){
-        console.log(e)
+        logger.error(e)
     }
     
 }
