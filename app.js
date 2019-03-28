@@ -46,7 +46,7 @@ setSchedule(config.date, async () => {
 //                 html: html
 //             })
 //         })
-});
+// });
 
 
 
