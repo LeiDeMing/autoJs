@@ -28,24 +28,24 @@ setSchedule(config.date, async () => {
     getHtml(config.selfBlog, '.post-title-link', gotoPage);
     getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
 });
-setSchedule('1 1 8 * * *', async () => {
-    getDyttMovie()
-        .then(res => {
-            let html = ''
-            res.forEach((curr, index) => {
-                html += `
-            <div>
-                <a href="${curr.link}">${curr.title}</a>
-            </div>
-            `
-            })
-            email.setEmail({
-                from: '2623024110@qq.com',
-                to: '136371773@qq.com',
-                subject: '最新电影(来自Nei服务器)',
-                html: html
-            })
-        })
+// setSchedule('1 1 8 * * *', async () => {
+//     getDyttMovie()
+//         .then(res => {
+//             let html = ''
+//             res.forEach((curr, index) => {
+//                 html += `
+//             <div>
+//                 <a href="${curr.link}">${curr.title}</a>
+//             </div>
+//             `
+//             })
+//             email.setEmail({
+//                 from: '2623024110@qq.com',
+//                 to: '136371773@qq.com',
+//                 subject: '最新电影(来自Nei服务器)',
+//                 html: html
+//             })
+//         })
 });
 
 
