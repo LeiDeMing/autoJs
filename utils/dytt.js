@@ -1,7 +1,9 @@
+const fetch=require('node-fetch');
 const getDownLink = require('../middlewares/getDownLink'),
     utils = require('./index'),
     logger = require('../common/log'),
-    client = require('../common/redis');
+    client = require('../common/redis')
+    setSuperagent=require('../controllers/setSuperagent');
 
 async function getDyttMovie() {
     try {
@@ -20,6 +22,14 @@ async function getDyttMovie() {
             let targetMovie = $list('td[bgcolor] a');
             let title = $list('h1 font');
             let img = $list('#Zoom>span img');
+            let reg=/(?<=《)(.*?)(?=》)/;
+            let titleText=title && title.eq(0).text();
+            let doubanData;
+            if(titleText.match(reg)){
+                doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${titleText.match(reg)[1]}`)
+            }
+            doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${titleText.match(reg)[1]}`)
+            console.log(doubanData)
             targetMovie.length > 0 && movieArr.push({
                 title: title && title.eq(0).text(),
                 link: targetMovie[0].attribs.href,
@@ -27,7 +37,7 @@ async function getDyttMovie() {
                     return val.attribs.src
                 })
             });
-            // if (x === 4) break;
+            if (x === 4) break;
         }
         client.sadd('dytt', movieArr);
         return movieArr;
