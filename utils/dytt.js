@@ -26,10 +26,14 @@ async function getDyttMovie() {
             let titleText=title && title.eq(0).text();
             let doubanData;
             if(titleText.match(reg)){
-                doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${titleText.match(reg)[1]}`)
+                doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${encodeURIComponent(titleText.match(reg)[1])}`)
+                
             }
-            doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${titleText.match(reg)[1]}`)
-            console.log(doubanData)
+            // doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${titleText.match(reg) && titleText.match(reg)[1]}`)
+
+            doubanData && (await doubanData.json().then(res=>{
+                console.log(res)
+            }))
             targetMovie.length > 0 && movieArr.push({
                 title: title && title.eq(0).text(),
                 link: targetMovie[0].attribs.href,
