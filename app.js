@@ -48,6 +48,22 @@ app.use('*', function (req, res) {
 //         })
 // });
 getDyttMovie()
+        .then(res => {
+            let html = ''
+            res.forEach((curr, index) => {
+                html += `
+            <p  style="font-size:14px;">
+                <ahref="${curr.link}">${curr.title}</a> <strong>豆瓣：</strong><span>${curr.rating}</span>
+            </p>
+            `
+            })
+            email.setEmail({
+                from: '2623024110@qq.com',
+                to: '136371773@qq.com',
+                subject: '最新电影(来自Nei服务器)',
+                html: html
+            })
+        })
 
 
 console.log(`服务开启，端口${config.port}`)
