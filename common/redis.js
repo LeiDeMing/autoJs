@@ -9,11 +9,12 @@ const client = new Redis({
     password: config.redis_password,
 });
 
-
 client.on('error',(e)=>{
     if(e){
         logger.error(e);
         process.exit(1);//?
     }
 });
+
+client
 module.exports=client

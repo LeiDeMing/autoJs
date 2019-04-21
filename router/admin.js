@@ -1,9 +1,9 @@
 const express=require('express');
 const app=express();
 const router=express.Router();
+const {getMoviewFromRedis,getDyttMovie} = require('../utils/dytt');
 
-
-router.get('/',function(req,res){
+router.get('/',async (req,res)=>{
     res.render('admin/index');
 })
 

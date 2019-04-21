@@ -26,31 +26,41 @@ async function getDyttMovie() {
             let titleText=title && title.eq(0).text();
             let doubanData;
             let detail;
-            if(titleText.match(reg)){
-                doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${encodeURIComponent(titleText.match(reg)[1])}`)
-                
-            }
+            let pureImg=[]
+            //豆瓣api需解决连续调用锁IP问题
+            // if(titleText.match(reg)){
+            //     doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${encodeURIComponent(titleText.match(reg)[1])}`)
+            // }
             // doubanData=await fetch(`https://api.douban.com/v2/movie/search?q=${titleText.match(reg) && titleText.match(reg)[1]}`)
-
-            doubanData && (await doubanData.json().then(res=>{
-                detail=res
-            }))
+            // doubanData && (await doubanData.json().then(res=>{
+            //     detail=res
+            // })
+            let imgArrr=img.map((i, val) => {
+                return val.attribs.src
+            })
+            if(imgArrr){
+                for(let y=0,yLen=imgArrr.length;y<yLen;y++){
+                    pureImg.push(imgArrr[y])
+                }
+            }
             targetMovie.length > 0 && movieArr.push({
                 title: title && title.eq(0).text(),
                 link: targetMovie[0].attribs.href,
-                img: img.map((i, val) => {
-                    return val.attribs.src
-                }),
-                detail,
-                rating:detail && detail['subjects'][0]['rating']['average']
+                img: pureImg,
+                movieLength:len-1
+                // detail
+                // rating:detail && detail['subjects'][0]['rating']['average']
             });
+            if(x==5) break;
         }
-        // client.sadd('dytt', movieArr);
-        return buble(movieArr);
+        // client.sadd('dytt', JSON.stringify(movieArr));
+        // return buble(movieArr);
+        return movieArr;
     } catch (e) {
         logger.error(e)
     }
 }
+
 function buble(arra){
     var temp;
     for(var i=0;i<arra.length;i++){ //比较多少趟，从第一趟开始
@@ -65,4 +75,13 @@ function buble(arra){
     return arra;
 }
 
-module.exports = getDyttMovie
+function getMoviewFromRedis(){
+    client.get('dytt',(err,res)=>{
+        console.log(res)
+    })
+}
+
+module.exports = {
+    getDyttMovie,
+    getMoviewFromRedis
+}
