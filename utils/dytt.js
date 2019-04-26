@@ -51,6 +51,7 @@ async function getDyttMovie() {
                 // detail
                 // rating:detail && detail['subjects'][0]['rating']['average']
             });
+            console.log(movieArr)
             if(x==5) break;
         }
         // client.sadd('dytt', JSON.stringify(movieArr));

@@ -78,4 +78,4 @@ app.all('*', function(req, res, next) {
 // getMoviewFromRedis()
 
 console.log(`服务开启，端口${config.port}`)
-app.listen(config.port,'192.168.43.157');
+app.listen(config.port,'172.16.171.195');
