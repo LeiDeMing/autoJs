@@ -10,6 +10,7 @@ const admin = require('./router/admin.js'),
     email = require('./utils/email'),
     config = require('./config/index'),
     font2=require('./utils/front2');
+    nifty=require('./utils/nifty');
 
 app.use(bodyParser.urlencoded({
     extended: false
@@ -77,6 +78,6 @@ app.all('*', function(req, res, next) {
 //             // })
 //         })
 // getMoviewFromRedis()
-font2()
+nifty()
 console.log(`服务开启，端口${config.port}`)
-app.listen(config.port,'172.16.171.195');
+app.listen(config.port,'172.16.171.45');
