@@ -38,8 +38,7 @@ jspm_packages/
 config/
 log/
 utils/img
-utils/nifty.js
-utils/front2.js
+utils/nifty
 # TypeScript v1 declaration files
 typings/
 
