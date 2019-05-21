@@ -37,6 +37,9 @@ node_modules/
 jspm_packages/
 config/
 log/
+utils/img
+utils/nifty.js
+utils/front2.js
 # TypeScript v1 declaration files
 typings/
 

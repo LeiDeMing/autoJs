@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const config = require('../config/index');
 const fs = require('fs');
 const open = require('open');
+const {deleteImg}=require('./index');
 
 async function setPupper(url) {
     let browser = await puppeteer.launch({
@@ -10,7 +11,7 @@ async function setPupper(url) {
     let newPage = await browser.newPage();
     let imgName=`translation${new Date().getTime()}`
     await newPage.goto(url);
-    deleteall('./utils/img')
+    deleteImg('./utils/img')
     fs.mkdirSync('./utils/img', (err) => {
         if (err) throw err;
     })
@@ -24,23 +25,6 @@ async function setPupper(url) {
     //     delay:100
     // });
     await newPage.close();
-}
-
-
-function deleteall(path) {
-    var files = [];
-    if (fs.existsSync(path)) {
-        files = fs.readdirSync(path);
-        files.forEach(function (file, index) {
-            var curPath = path + "/" + file;
-            if (fs.statSync(curPath).isDirectory()) { // recurse
-                deleteall(curPath);
-            } else { // delete file
-                fs.unlinkSync(curPath);
-            }
-        });
-        fs.rmdirSync(path);
-    }
 }
 
 async function main() {
