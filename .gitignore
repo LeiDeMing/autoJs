@@ -39,6 +39,7 @@ config/
 log/
 utils/img
 utils/nifty
+scripts
 # TypeScript v1 declaration files
 typings/
 
