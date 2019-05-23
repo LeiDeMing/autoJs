@@ -6,11 +6,12 @@ const admin = require('./router/admin.js'),
     setSchedule = require('./middlewares/setSchedule'),
     gotoPage = require('./controllers/gotoPage'),
     getHtml = require('./middlewares/getHtml'),
-    {getMoviewFromRedis,getDyttMovie} = require('./utils/dytt'),
     email = require('./utils/email'),
     config = require('./config/index'),
-    font2=require('./utils/front2');
-    nifty=require('./utils/nifty');
+    // font2=require('./utils/nifty/front2'),
+    // nifty=require('./utils/nifty/nifty'),
+    // mongoDB=require('./db/index'),
+    dyjy=require('./utils/movie/dyjy');
 
 app.use(bodyParser.urlencoded({
     extended: false
@@ -77,7 +78,6 @@ app.all('*', function(req, res, next) {
 //             //     html: html
 //             // })
 //         })
-// getMoviewFromRedis()
-nifty()
+dyjy()
 console.log(`服务开启，端口${config.port}`)
 app.listen(config.port,'172.16.171.45');
