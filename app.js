@@ -12,7 +12,7 @@ const admin = require('./router/admin.js'),
     // nifty=require('./utils/nifty/nifty'),
     // mongoDB=require('./db/index'),
     dyjy=require('./utils/movie/dyjy');
-
+    require('events').EventEmitter.defaultMaxListeners = 30;
 app.use(bodyParser.urlencoded({
     extended: false
 }));

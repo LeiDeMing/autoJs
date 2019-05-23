@@ -1,30 +1,82 @@
 const puppeteer = require('puppeteer'),
     fs = require('fs');
 const config = require('../../config/index'),
-    { deleteImg } = require('../index');
+    { deleteImg } = require('../index'),
+    setSchedule = require('../../middlewares/setSchedule');
 
 
-async function getMovieFromDyjy(){
+async function getMovieFromDyjy() {
     let browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-    const page=await browser.newPage();
-    let pageSize=1;
-    let year=2019;
-    let pageAll=1
-    let dyjyUrl=`http://www.idyjy.com/w.asp?p=${pageSize}&f=3&n=${year}&l=s`;
-    await page.goto(dyjyUrl);
-    const pageNav=await page.$eval('#pages', el =>  el.innerText);
-    pageAll=pageNav.split(':')[1].split('页首页')[0].split('/')[1];
-    
-    let oLi=await page.$$('.img-list li');
-    for(let x=0;x<oLi.length;x++){
-        oLi[x]
+    const page = await browser.newPage();
+    let pageSize = 1;
+    let maxYear = 2019;
+    let minYear = 2002
+    let pageAll = 1
+    let hrefList = []
+    let hrefListIndex = 0
+    const movieData = []
+    const domSelector = [{
+        type: 'single',
+        value: '#name',
+        key: 'name'
+    },
+    {
+        type: 'double',
+        value: '.info ul li',
+        key: 'info'
+    },
+    {
+        type: 'single',
+        value: '.textdesc',
+        key: 'textdesc'
+    },
+    {
+        type:'single',
+        value:'.pic img',
+        key:'imgSrc'
+    }]
+    let dyjyUrl = `http://www.idyjy.com/w.asp?p=${pageSize}&f=3&n=${maxYear}&l=s`;
+    try {
+        await page.goto(dyjyUrl);
+    } catch (e) {
+        console.log(e)
+    }
+    const pageNav = await page.$eval('#pages', el => el.innerText);
+    pageAll = pageNav.split(':')[1].split('页首页')[0].split('/')[1];
+
+    let aList = await page.$$('.play-img');
+    for (let x = 0; x < aList.length; x++) {
+        let jsHandleObj = await aList[x].getProperty('href');
+        const { value } = jsHandleObj._remoteObject;
+        hrefList.push(value)
+    }
+    await deepMovie({
+        hrefList, page, movieData
+    })
+
+}
+
+async function deepMovie(options) {
+    let { hrefList, page, movieData } = options
+    await page.goto(hrefList[0]);
+    let name = await page.$eval('#name', el => el.innerText);
+    let textdesc = await page.$eval('.textdesc', el => el.innerText);
+    let imgSrc = await page.$eval('.pic img', el => el.src);
+    movieData.push({
+        name,
+        textdesc,
+        imgSrc
+    });
+    hrefList.shift();
+    if (!!hrefList.length) {
+        await deepMovie(options)
     }
 }
 
-async function main(){
+async function main() {
     await getMovieFromDyjy();
 }
 
-module.exports=main
+module.exports = main
