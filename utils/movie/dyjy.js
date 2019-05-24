@@ -3,10 +3,11 @@ const puppeteer = require('puppeteer'),
 const config = require('../../config/index'),
     { deleteImg } = require('../index'),
     mongoDB = require('../../db/index.js'),
-    logger = require('../../common/log'),
+    setLogOptions = require('../../common/log'),
     setSchedule = require('../../middlewares/setSchedule');
 
-
+const logger = setLogOptions('dyjy');
+console.log('logger')
 async function getMovieFromDyjy() {
     let browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -42,21 +43,11 @@ async function getMovieFromDyjy() {
     let dyjyUrl = `http://www.idyjy.com/w.asp?p=${pageSize}&f=3&n=${maxYear}&l=s`;
     try {
         await page.goto(dyjyUrl);
+        const pageNav = await page.$eval('#pages', el => el.innerText);
+        pageAll = pageNav.split(':')[1].split('页首页')[0].split('/')[1];
     } catch (e) {
-        console.log(e)
+        logger.error(e)
     }
-    const pageNav = await page.$eval('#pages', el => el.innerText);
-    pageAll = pageNav.split(':')[1].split('页首页')[0].split('/')[1];
-
-    // let aList = await page.$$('.play-img');
-    // for (let x = 0; x < aList.length; x++) {
-    //     let jsHandleObj = await aList[x].getProperty('href');
-    //     const { value } = jsHandleObj._remoteObject;
-    //     hrefList.push(value)
-    // }
-    // await deepMovie({
-    //     hrefList, page, movieData
-    // })
 
     try {
         await deepYear({
@@ -137,6 +128,7 @@ async function deepMovie(options) {
     }
 }
 async function main() {
+
     await getMovieFromDyjy();
 }
 
