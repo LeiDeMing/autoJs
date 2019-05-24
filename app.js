@@ -39,10 +39,10 @@ app.all('*', function(req, res, next) {
 });
 
 dyjy()
-setSchedule(config.date, async () => {
-    getHtml(config.selfBlog, '.post-title-link', gotoPage);
-    getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
-});
+// setSchedule(config.date, async () => {
+//     getHtml(config.selfBlog, '.post-title-link', gotoPage);
+//     getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
+// });
 // setSchedule('1 1 8 * * *', async () => {
 //     getDyttMovie()
 //         .then(res => {
