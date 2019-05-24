@@ -77,7 +77,7 @@ async function deepYear(deepYearOpt) {
         if (minYear <= maxYear) {
             await deepYear(deepYearOpt)
         }
-    }catch(e){
+    } catch (e) {
         logger.error(e);
         logger.info(`Year:${minYear}`)
     }
@@ -94,7 +94,7 @@ async function deepPage(deepPageOpt) {
         hrefList.push(value)
     }
     await deepMovie({
-        hrefList, page, movieData, maxYear
+        hrefList, page, movieData, maxYear, minYear
     })
     pageSize++;
     if (pageSize <= pageAll) {
