@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer'),
     fs = require('fs');
 const config = require('../../config/index'),
     { deleteImg } = require('../index'),
+    mongoDB=require('../../db/index.js'),
     setSchedule = require('../../middlewares/setSchedule');
 
 
@@ -56,14 +57,25 @@ async function getMovieFromDyjy() {
     //     hrefList, page, movieData
     // })
 
-    await deepPage({
-        page, hrefList, movieData, pageSize, pageAll, maxYear
+    await deepYear({
+        page, hrefList, movieData, pageSize, pageAll, maxYear, minYear
     })
 }
 
+async function deepYear(deepYearOpt) {
+    let { page, hrefList, movieData, pageSize, pageAll, maxYear = 2019, minYear = 2012 } = deepYearOpt
+    await deepPage({
+        page, hrefList, movieData, pageSize, pageAll, maxYear,minYear
+    })
+    minYear++;
+    if (minYear <= maxYear) {
+        await deepYear(deepYearOpt)
+    }
+}
+
 async function deepPage(deepPageOpt) {
-    let { page, hrefList, movieData, pageSize, pageAll, maxYear } = deepPageOpt
-    let dyjyUrl = `http://www.idyjy.com/w.asp?p=${pageSize}&f=3&n=${maxYear}&l=s`;
+    let { page, hrefList, movieData, pageSize, pageAll, maxYear, minYear } = deepPageOpt
+    let dyjyUrl = `http://www.idyjy.com/w.asp?p=${pageSize}&f=3&n=${minYear}&l=s`;
     await page.goto(dyjyUrl)
     let aList = await page.$$('.play-img');
     for (let x = 0; x < aList.length; x++) {
@@ -72,29 +84,44 @@ async function deepPage(deepPageOpt) {
         hrefList.push(value)
     }
     await deepMovie({
-        hrefList, page, movieData,maxYear
+        hrefList, page, movieData, maxYear
     })
-    pageSize++
+    pageSize++;
     if (pageSize <= pageAll) {
         await deepPage(deepPageOpt);
     }
 }
 
 async function deepMovie(options) {
-    let { hrefList, page, movieData,maxYear } = options
+    let { hrefList, page, movieData, maxYear } = options
     await page.goto(hrefList[0]);
     let name = await page.$eval('#name', el => el.innerText);
     let textdesc = await page.$eval('.textdesc', el => el.innerText);
-    let imgSrc = await page.$eval('.pic img', el => el.src);//down_list
+    let imgSrc = await page.$eval('.pic img', el => el.src);//info
     let downSrc = await page.$eval('input[name="down_url_list_0"]', el => el.value);
-    movieData.push({
+    let score=await page.$eval('#filmStarScore', el => el.innerText);
+    let info=await page.$$eval('.info ul li', el => {
+        let textArr=[]
+        for(let x=0;x<el.length;x++){
+            textArr.push(el[x].innerText)
+        }
+        return textArr
+    });
+    let movieObj={
         name,
         textdesc,
         imgSrc,
-        year:maxYear,
-        thunder:downSrc
-    });
+        year: maxYear,
+        thunder: downSrc,
+        score,
+        info,
+        create_time:new Date().toString()
+    }
+    movieData.push(movieObj);
     hrefList.shift();
+    await mongoDB.save('movie_list',movieObj,(err,result)=>{
+        if(err) throw err
+    })
     if (!!hrefList.length) {
         await deepMovie(options)
     }
