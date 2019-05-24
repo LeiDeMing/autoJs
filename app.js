@@ -38,10 +38,11 @@ app.all('*', function(req, res, next) {
     next();
 });
 
-// setSchedule(config.date, async () => {
-//     getHtml(config.selfBlog, '.post-title-link', gotoPage);
-//     getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
-// });
+dyjy()
+setSchedule(config.date, async () => {
+    getHtml(config.selfBlog, '.post-title-link', gotoPage);
+    getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
+});
 // setSchedule('1 1 8 * * *', async () => {
 //     getDyttMovie()
 //         .then(res => {
@@ -78,6 +79,5 @@ app.all('*', function(req, res, next) {
 //             //     html: html
 //             // })
 //         })
-dyjy()
 console.log(`服务开启，端口${config.port}`)
 app.listen(config.port,'172.16.171.45');
