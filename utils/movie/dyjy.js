@@ -59,11 +59,11 @@ async function getMovieFromDyjy() {
 
 async function deepYear(deepYearOpt) {
     try {
-        let { page, hrefList, movieData, pageSize, pageAll, maxYear = 2019, minYear = 2012 } = deepYearOpt
+        let { page, hrefList, movieData, pageSize, pageAll, maxYear = 2019, minYear = 2002 } = deepYearOpt 
+        minYear++;
         await deepPage({
             page, hrefList, movieData, pageSize, pageAll, maxYear, minYear
         })
-        minYear++;
         if (minYear <= maxYear) {
             await deepYear(deepYearOpt)
         }
