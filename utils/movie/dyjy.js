@@ -59,7 +59,7 @@ async function getMovieFromDyjy() {
 
 async function deepYear(deepYearOpt) {
     try {
-        let { page, hrefList, movieData, pageSize, pageAll, maxYear = 2019, minYear = 2002 } = deepYearOpt 
+        let { page, hrefList, movieData, pageSize, pageAll, maxYear = 2019, minYear = 2002 } = deepYearOpt
         minYear++;
         await deepPage({
             page, hrefList, movieData, pageSize, pageAll, maxYear, minYear
@@ -93,36 +93,42 @@ async function deepPage(deepPageOpt) {
 
 async function deepMovie(options) {
     let { hrefList, page, movieData, maxYear, minYear } = options
-    await page.goto(hrefList[0]);
-    let name = await page.$eval('#name', el => el.innerText);
-    let textdesc = await page.$eval('.textdesc', el => el.innerText);
-    let imgSrc = await page.$eval('.pic img', el => el.src);//info
-    let downSrc = await page.$eval('input[name="down_url_list_0"]', el => el.value);
-    let score = await page.$eval('#filmStarScore', el => el.innerText);
-    let info = await page.$$eval('.info ul li', el => {
-        let textArr = []
-        for (let x = 0; x < el.length; x++) {
-            textArr.push(el[x].innerText)
+    try {
+        await page.goto(hrefList[0]);
+        let name = await page.$eval('#name', el => el.innerText);
+        let textdesc = await page.$eval('.textdesc', el => el.innerText);
+        let imgSrc = await page.$eval('.pic img', el => el.src);//info
+        let downSrc = await page.$eval('input[name="down_url_list_0"]', el => el.value);
+        let score = await page.$eval('#filmStarScore', el => el.innerText);
+        let info = await page.$$eval('.info ul li', el => {
+            let textArr = []
+            for (let x = 0; x < el.length; x++) {
+                textArr.push(el[x].innerText)
+            }
+            return textArr
+        });
+        let movieObj = {
+            name,
+            textdesc,
+            imgSrc,
+            year: minYear,
+            thunder: downSrc,
+            score,
+            info,
+            create_time: new Date().toString()
         }
-        return textArr
-    });
-    let movieObj = {
-        name,
-        textdesc,
-        imgSrc,
-        year: minYear,
-        thunder: downSrc,
-        score,
-        info,
-        create_time: new Date().toString()
-    }
-    movieData.push(movieObj);
-    hrefList.shift();
-    await mongoDB.save('movie_list', movieObj, (err, result) => {
-        if (err) throw err
-    })
-    if (!!hrefList.length) {
-        await deepMovie(options)
+        movieData.push(movieObj);
+        hrefList.shift();
+        await mongoDB.save('movie_list', movieObj, (err, result) => {
+            if (err) throw err
+        })
+        if (!!hrefList.length) {
+            await deepMovie(options)
+        }
+    }catch(e){
+        logger.error(e)
+    }finally{
+        deepMovie(options)
     }
 }
 async function main() {
