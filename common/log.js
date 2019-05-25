@@ -1,18 +1,18 @@
 const log4js = require('log4js');
 const config=require('../config/index');
 
-function setLogOptions(filename='cheese',appenders='cheese',level='level'){
+function setLogOptions(filename='cheese',appenders='cheese',level='debug'){
     log4js.configure({
         appenders: {
             cheese: {
                 type: 'file',
-                filename: `${config.log}cheese.log`
+                filename: `${config.log}${filename}.log`
             }
         },
         categories: {
             default: {
-                appenders: ['cheese'],
-                level: 'debug'
+                appenders: [appenders],
+                level: level
             }
         }
     });

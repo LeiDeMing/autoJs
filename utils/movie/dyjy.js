@@ -7,7 +7,6 @@ const config = require('../../config/index'),
     setSchedule = require('../../middlewares/setSchedule');
 
 const logger = setLogOptions('dyjy');
-console.log('logger')
 async function getMovieFromDyjy() {
     let browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -70,7 +69,6 @@ async function deepYear(deepYearOpt) {
         }
     } catch (e) {
         logger.error(e);
-        logger.info(`Year:${minYear}`)
     }
 }
 
