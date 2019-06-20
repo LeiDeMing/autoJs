@@ -7,11 +7,11 @@ const admin = require('./router/admin.js'),
     gotoPage = require('./controllers/gotoPage'),
     getHtml = require('./middlewares/getHtml'),
     email = require('./utils/email'),
-    config = require('./config/index'),
+    config = require('./config/index');
     // font2=require('./utils/nifty/front2'),
     // nifty=require('./utils/nifty/nifty'),
-    mongoDB=require('./db/index'),
-    dyjy=require('./utils/movie/dyjy');
+    // mongoDB=require('./db/index'),
+    // dyjy=require('./utils/movie/dyjy');
     require('events').EventEmitter.defaultMaxListeners = 30;
 app.use(bodyParser.urlencoded({
     extended: false
@@ -38,7 +38,7 @@ app.all('*', function(req, res, next) {
     next();
 });
 
-dyjy()
+// dyjy()
 // setSchedule(config.date, async () => {
 //     getHtml(config.selfBlog, '.post-title-link', gotoPage);
 //     getHtml(config.juejinUrl, '.abstract-row .title', gotoPage);
