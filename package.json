@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "node app.js"
+    "server": "node app.js",
+    "eStart":"electron ."
   },
   "author": "",
   "license": "ISC",
@@ -38,5 +39,8 @@
     "superagent": "^4.1.0",
     "superagent-charset": "^1.2.0",
     "true-html-escape": "^1.0.0"
+  },
+  "devDependencies": {
+    "electron": "^6.0.9"
   }
 }
