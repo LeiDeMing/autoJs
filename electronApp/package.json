@@ -18,5 +18,8 @@
   "author": "GitHub",
   "devDependencies": {
     "electron": "^6.0.9"
+  },
+  "dependencies": {
+    "node-cmd": "^3.0.0"
   }
 }

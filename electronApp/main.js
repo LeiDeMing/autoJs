@@ -17,9 +17,10 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      devTools:true
+      // devTools:true
     }
   })
+  // mainWindow.webContents.openDevTools()
   mainWindow.loadURL(path.join('file://', __dirname, '/index.html'))
 
   mainWindow.on('closed', function () {
