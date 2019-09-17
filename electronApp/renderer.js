@@ -1,6 +1,13 @@
-const {ipcRenderer} = require('electron')
-const contextMenuBtn = document.getElementById('context-menu')
+const spawn = require('child_process').spawn;
+const os = require('os')
 
-contextMenuBtn.addEventListener('click', () => {
-  ipcRenderer.send('show-context-menu')
+//股份项目
+const gufenBtn = document.getElementById('gufen-menu')
+gufenBtn.addEventListener('click', () => {
+  spawn('explorer.exe', ['D:\\company\\gufen\\bugFix'])
+})
+
+const githubBtn = document.getElementById('github-menu')
+githubBtn.addEventListener('click', () => {
+  spawn('explorer.exe', ['D:\\github'])
 })
