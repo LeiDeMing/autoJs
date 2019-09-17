@@ -1,13 +1,12 @@
 const spawn = require('child_process').spawn;
 const os = require('os')
+const options =require('./config/index')
+let codeExe = ''
 
-//股份项目
-const gufenBtn = document.getElementById('gufen-menu')
-gufenBtn.addEventListener('click', () => {
-  spawn('explorer.exe', ['D:\\company\\gufen\\bugFix'])
-})
 
-const githubBtn = document.getElementById('github-menu')
-githubBtn.addEventListener('click', () => {
-  spawn('explorer.exe', ['D:\\github'])
+options.forEach(item => {
+  const { exeName, domName, target } = item
+  document.getElementById(domName).addEventListener('click', () => {
+    spawn(exeName, [target])
+  })
 })

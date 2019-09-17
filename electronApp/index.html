@@ -1,15 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <Button id="gufen-menu">股份项目</Button>
-    <Button id="github-menu">GitHub项目</Button>
 
-    <script type="text/javascript">
-      require('./renderer')
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+</head>
+
+<body>
+  <div>
+    <p>
+      -------------------股份根节点------------------
+    </p>
+    <button id="gufen-menu">股份项目大全</button>
+    <button id="gufenZaXiang-menu">股份杂项</button>
+    <button id="presapTxT-menu">presapTxT</button>
+    <div>
+      <p>
+        -------------------具体项目------------------
+      </p>
+      <div id="gufenProDetail-wrap">
+
+      </div>
+    </div>
+    <p>-------------------------------------------------------------</p>
+  </div>
+  <div>
+    <button id="github-menu">GitHub项目</button>
+  </div>
+  <script type="text/javascript">
+    const fs = require('fs')
+    const file1 = fs.readdirSync('D:\\company\\gufen\\bugFix')
+    const gufenProDetailWrap = document.querySelector('#gufenProDetail-wrap')
+    file1.forEach(item => {
+      let btn = document.createElement('button')
+      btn.id = `gufen${item}-menu`
+      btn.innerText=item
+      btn.style.cssText='margin-right:10px;margin-top:6px;padding:6px'
+      gufenProDetailWrap.appendChild(btn)
+    })
+  </script>
+  <script type="text/javascript">
+    require('./renderer')
+  </script>
+</body>
+
 </html>
