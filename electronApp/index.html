@@ -23,19 +23,27 @@
     <p>-------------------------------------------------------------</p>
   </div>
   <div>
-    <button id="github-menu">GitHub项目</button>
+    <p>
+      -------------------GitHub项目------------------
+    </p>
+    <div id="github-wrap"></div>
   </div>
   <script type="text/javascript">
     const fs = require('fs')
-    const file1 = fs.readdirSync('D:\\company\\gufen\\bugFix')
-    const gufenProDetailWrap = document.querySelector('#gufenProDetail-wrap')
-    file1.forEach(item => {
-      let btn = document.createElement('button')
-      btn.id = `gufen${item}-menu`
-      btn.innerText=item
-      btn.style.cssText='margin-right:10px;margin-top:6px;padding:6px'
-      gufenProDetailWrap.appendChild(btn)
-    })
+    generateDom('#gufenProDetail-wrap','D:\\company\\gufen\\bugFix','gufen')
+    generateDom('#github-wrap','D:\\github','github')
+
+    function generateDom(dom,filePath,kind) {
+      const file = fs.readdirSync(filePath)
+      const gufenProDetailWrap = document.querySelector(dom)
+      file.forEach(item => {
+        let btn = document.createElement('button')
+        btn.id = `${kind}${item}-menu`
+        btn.innerText = item
+        btn.style.cssText = 'margin-right:10px;margin-top:6px;padding:6px'
+        gufenProDetailWrap.appendChild(btn)
+      })
+    }
   </script>
   <script type="text/javascript">
     require('./renderer')
