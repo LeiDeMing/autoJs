@@ -32,10 +32,17 @@
     </p>
     <div id="github-wrap"></div>
   </div>
+  <div>
+    <p>
+      -------------------GitHubCode------------------
+    </p>
+    <div id="githubCode-wrap"></div>
+  </div>
   <script type="text/javascript">
     const fs = require('fs')
     generateDom('#gufenProDetail-wrap','D:\\company\\gufen\\bugFix','gufen')
     generateDom('#github-wrap','D:\\github','github')
+    generateDom('#githubCode-wrap','D:\\demo','githubCode')
 
     function generateDom(dom,filePath,kind) {
       const file = fs.readdirSync(filePath)
