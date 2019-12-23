@@ -1,6 +1,8 @@
 const express = require('express'),
     app = express(),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    puppeteer = require('puppeteer'),
+    fs = require('fs');
 const admin = require('./router/admin.js'),
     api = require('./router/api.js'),
     setSchedule = require('./middlewares/setSchedule'),
@@ -8,11 +10,11 @@ const admin = require('./router/admin.js'),
     getHtml = require('./middlewares/getHtml'),
     email = require('./utils/email'),
     config = require('./config/index');
-    // font2=require('./utils/nifty/front2'),
-    // nifty=require('./utils/nifty/nifty'),
-    // mongoDB=require('./db/index'),
-    // dyjy=require('./utils/movie/dyjy');
-    require('events').EventEmitter.defaultMaxListeners = 30;
+// font2=require('./utils/nifty/front2'),
+// nifty=require('./utils/nifty/nifty'),
+// mongoDB=require('./db/index'),
+// dyjy=require('./utils/movie/dyjy');
+require('events').EventEmitter.defaultMaxListeners = 30;
 app.use(bodyParser.urlencoded({
     extended: false
 }));
@@ -30,7 +32,7 @@ app.use('*', function (req, res) {
     res.render('403');
 })
 
-app.all('*', function(req, res, next) {
+app.all('*', function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -79,5 +81,10 @@ app.all('*', function(req, res, next) {
 //             //     html: html
 //             // })
 //         })
+
+
+
+
+
 console.log(`服务开启，端口${config.port}`)
 app.listen(config.port);
