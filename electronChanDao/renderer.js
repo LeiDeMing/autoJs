@@ -6,7 +6,7 @@ const { ipcRenderer } = require('electron')
 const WindowsToaster = require('node-notifier').WindowsToaster;
 const schedule = require('node-schedule');
 const { setSchedule } = require('./utils')
-const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass } = require('./config')
+const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl } = require('./config')
 
 var Notifier = new WindowsToaster({
     withFallback: false, // Fallback to Growl or Balloons?
@@ -154,7 +154,12 @@ async function main() {
 }
 
 const scheduleBtn = document.querySelector('#getBug')
+const gitBranchBtn = document.querySelector('#gitBranch')
+const dateStartInput = document.querySelector('#dateStart')
+const dateEndInput = document.querySelector('#dateEnd')
+let dateObj = {
 
+}
 scheduleBtn.addEventListener('click', async () => {
     let rule = new schedule.RecurrenceRule();
     let _d = new Date()
@@ -167,5 +172,34 @@ scheduleBtn.addEventListener('click', async () => {
     })
     // await main()
 })
+
+dateStartInput.addEventListener('change', (event) => {
+    dateObj.startTime = event.target.value
+})
+
+dateEndInput.addEventListener('change', (event) => {
+    dateObj.endTime = event.target.value
+})
+
+gitBranchBtn.addEventListener('change', (event) => {
+    let gitBranchValue = event.target.value || 'develop'
+    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${gitBranchValue}&page=1&per_page=999`
+    if (dateObj.startTime) {
+        _url += `&since=${dateObj.startTime}`
+    } if (dateObj.endTime) {
+        _url += `&until=${dateObj.endTime}`
+    }
+    fetch(_url, {
+        headers: {
+            'PRIVATE-TOKEN': gitlabAccessToken
+        }
+    }).then(response => {
+        return response.json()
+    }).then(data => {
+        console.log(data)
+    })
+})
+
+
 
 module.exports = main
