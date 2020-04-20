@@ -9,7 +9,8 @@ const admin = require('./router/admin.js'),
     gotoPage = require('./controllers/gotoPage'),
     getHtml = require('./middlewares/getHtml'),
     email = require('./utils/email'),
-    config = require('./config/index');
+    config = require('./config/index'),
+    chandao = require('./utils/chandao');
 // font2=require('./utils/nifty/front2'),
 // nifty=require('./utils/nifty/nifty'),
 // mongoDB=require('./db/index'),
@@ -40,6 +41,7 @@ app.all('*', function (req, res, next) {
     next();
 });
 
+chandao()
 // dyjy()
 // setSchedule(config.date, async () => {
 //     getHtml(config.selfBlog, '.post-title-link', gotoPage);

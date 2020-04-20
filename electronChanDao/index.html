@@ -1,0 +1,38 @@
+<!--
+ * @Author: NeiDeMing
+ * @Date: 2020-04-17 15:56:57
+ * @LastEditors: NeiDeMing
+ * @LastEditTime: 2020-04-19 15:22:54
+ * @FilePath: \autoJs\electronChanDao\index.html
+ -->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>禅道助手</title>
+</head>
+
+<body>
+  <div>
+    <button id='getBug'>
+      启动禅道定时任务(2,1)
+    </button>
+    <p>
+      <span>上次获取bug数量：<strong id="preBugNum"></strong></span>
+    </p>
+    <p>
+      <span>本次获取bug数量：<strong id="lastBugNum"></strong></span>
+    </p>
+    <p>
+      <span>本次获取bug新增：<strong id="lastAddBugNum"></strong></span>
+    </p>
+  </div>
+  <script type="text/javascript">
+  </script>
+  <script type="text/javascript">
+    require('./renderer')
+  </script>
+</body>
+
+</html>
