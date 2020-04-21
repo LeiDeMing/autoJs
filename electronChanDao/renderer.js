@@ -210,6 +210,7 @@ gitBranchBtn.addEventListener('change', (event) => {
         return response.json()
     }).then(async data => {
         const typeId = []
+        const typeObj = {}
         data.forEach(item => {
             if (item.message.indexOf('Merge branch') > -1) {
                 item.type = 'Merge branch'
@@ -223,7 +224,7 @@ gitBranchBtn.addEventListener('change', (event) => {
                 item.type = commitMsgE[0]
                 item.typeId = parseInt(commitMsgE[1])
                 if (item.typeId) {
-                    typeId.push(item.typeId)
+                    typeId.push(item.typeId/* +'--'+item.committer_name */)
                 }
             }
         })
@@ -233,40 +234,26 @@ gitBranchBtn.addEventListener('change', (event) => {
         //     await page.waitFor(1000)
         //     await page.screenshot({ path: `./utils/img/1.png` });
         // })
-        // Promise.all(typeId.map(async item => {
-        //     const { page, browser } = await createPage(`${urlName}/user-login.html`)
-        //     await login(page, async (page) => {
-        //         await page.goto(`${urlName}/bug-view-${item}.html`)
-        //         await page.waitFor(1000)
-        //         await page.waitForSelector('.status-closed')
-        //         let content = await page.$eval('.status-closed', el => el.innerText);
-        //         console.log(content)
-        //         // await page.screenshot({ path: `./utils/img/${item}.png` });
-        //         await page.close()
-        //         try {
-        //             await browser.close();
-        //         } catch (e) {
-        //             console.log(e)
-        //         }
-        //     })
+        // Promise.all(typeId.map(async (item, index) => {
+        //异步
         // }))
-        typeId.map(async item => {
+        for (let x = 0; x < typeId.length; x++) {
             const { page, browser } = await createPage(`${urlName}/user-login.html`)
             await login(page, async (page) => {
-                await page.goto(`${urlName}/bug-view-${item}.html`)
-                await page.waitFor(1000)
-                await page.waitForSelector('.status-closed')
-                let content = await page.$eval('.status-closed', el => el.innerText);
-                console.log(content)
-                // await page.screenshot({ path: `./utils/img/${item}.png` });
-                await page.close()
                 try {
+                    await page.goto(`${urlName}/bug-view-${typeId[x]}.html`)
+                    await page.waitFor(2000)
+                    await page.waitForSelector('.status-closed')
+                    let content = await page.$eval('.status-closed', el => el.innerText);
+                    console.log(content, typeId[x])
+                    // await page.screenshot({ path: `./utils/img/${typeId[x]}.png` });
+                    await page.close()
                     await browser.close();
                 } catch (e) {
                     console.log(e)
                 }
             })
-        })
+        }
         gitDataDom.value = JSON.stringify(data)
         console.log(data)
     })
