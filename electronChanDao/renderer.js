@@ -21,24 +21,34 @@ const store = new Store({ schema });
 
 const chromePath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
 
-async function setPupper(url = '') {
-    let imgName = `chandao${new Date().getTime()}`
+async function createPage(url) {
     let browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         executablePath: chromePath
     });
     const page = await browser.newPage();
-
-    const navigationPromise = page.waitForNavigation()
     await page.goto(url);
     await page.setViewport({ width: 1366, height: 625 })
+    return { page, browser }
 
-    //登陆
+}
+
+async function login(page, callback) {
     await page.type('#account', chanDaoName);
     await page.type('input[type=password]', chanDaoPass);
     await page.click('button[type=submit]');
-    await navigationPromise
+    await page.waitForNavigation()
     console.log('login')
+
+    callback && await callback(page)
+}
+
+async function setPupper(url = '') {
+    let imgName = `chandao${new Date().getTime()}`
+    const { page } = await createPage(url)
+    const navigationPromise = page.waitForNavigation()
+    //登陆
+    await login(page)
 
     //测试
     await page.waitForSelector('.container > #navbar > .nav > li:nth-child(3) > a')
@@ -157,14 +167,16 @@ const scheduleBtn = document.querySelector('#getBug')
 const gitBranchBtn = document.querySelector('#gitBranch')
 const dateStartInput = document.querySelector('#dateStart')
 const dateEndInput = document.querySelector('#dateEnd')
+const gitDataDom = document.querySelector('#gitData')
 let dateObj = {
-
+    startTime: '2020-04-13',
+    endTime: '2020-04-17'
 }
 scheduleBtn.addEventListener('click', async () => {
     let rule = new schedule.RecurrenceRule();
     let _d = new Date()
-    // rule.minute = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
-    rule.minute = [0, 15, 30, 45];
+    rule.minute = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
+    // rule.minute = [0, 15, 30, 45];
     scheduleBtn.setAttribute('disabled', 'true')
     setSchedule(rule, async () => {
         console.log('定时任务启动 --- ' + _d)
@@ -195,7 +207,42 @@ gitBranchBtn.addEventListener('change', (event) => {
         }
     }).then(response => {
         return response.json()
-    }).then(data => {
+    }).then(async data => {
+        const typeId = []
+        data.forEach(item => {
+            if (item.message.indexOf('Merge branch') > -1) {
+                item.type = 'Merge branch'
+                item.typeId = 'Merge branch'
+                return
+            }
+            let commitMsgF = item.message.split('@')
+            let commitMsgE
+            if (commitMsgF[1]) {
+                commitMsgE = commitMsgF[1].split('&')
+                item.type = commitMsgE[0]
+                item.typeId = parseInt(commitMsgE[1])
+                if (item.typeId) {
+                    typeId.push(item.typeId)
+                }
+            }
+        })
+        console.log(typeId)
+        // await login(page, async (page) => {
+        //     await page.goto(`${urlName}/bug-view-2395.html`)
+        //     await page.waitFor(1000)
+        //     await page.screenshot({ path: `./utils/img/1.png` });
+        // })
+        Promise.all(typeId.map(async item => {
+            const { page, browser } = await createPage(`${urlName}/user-login.html`)
+            await login(page, async (page) => {
+                await page.goto(`${urlName}/bug-view-${item}.html`)
+                await page.waitFor(1000)
+                await page.screenshot({ path: `./utils/img/${item}.png` });
+                await page.close()
+                await browser.close();
+            })
+        }))
+        gitDataDom.value = JSON.stringify(data)
         console.log(data)
     })
 })

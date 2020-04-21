@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-04-20 18:24:43
+ * @LastEditTime: 2020-04-21 14:53:24
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -10,6 +10,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="./public/layui/css/layui.css" media="all">
   <title>禅道助手</title>
   <style>
     .contain {
@@ -23,6 +24,7 @@
 </head>
 
 <body>
+  <input type="hidden" id="gitData">
   <div class="contain">
     <div>
       <button id='getBug'>
@@ -61,12 +63,77 @@
           <option value="release">release</option>
         </select>
       </label>
+      </br>
+      <label for="generateTable">
+        <button id="generateTable" name="generateTable">
+          生成表格
+        </button>
+      </label>
     </div>
   </div>
+  <table class="layui-hide" id="chanDaoTable"></table>
   <script type="text/javascript">
   </script>
   <script type="text/javascript">
     require('./renderer')
+  </script>
+  <script src="./public/layui/layui.js" charset="utf-8"></script>
+  <script>
+    document.querySelector('#generateTable').addEventListener('click', (e) => {
+      layui.use('table', function () {
+        var table = layui.table,
+          form = layui.form;
+
+        table.render({
+          elem: '#chanDaoTable',
+          url: '',
+          cellMinWidth: 80,
+          height: 500,
+          cols: [
+            [{
+              type: 'numbers'
+            }, {
+              type: 'checkbox'
+            }, {
+              field: 'committed_date',
+              title: 'committed_date',
+              sort: true
+            }, {
+              field: 'committer_name',
+              title: 'committer_name',
+              sort: true
+            }, {
+              field: 'message',
+              title: 'commit message',
+              sort: true
+            }, {
+              field: 'type',
+              title: 'type',
+              sort: true
+            }, {
+              field: 'typeId',
+              title: 'type_id',
+              sort: true
+            }, {
+              field: 'parent_ids',
+              title: 'parent_ids',
+              sort: true
+            }, {
+              field: 'author_name',
+              title: 'author_name',
+              unresize: true,
+              sort: true
+            }, {
+              field: 'author_email',
+              title: 'author_email',
+              sort: true
+            }]
+          ],
+          data: JSON.parse(document.querySelector('#gitData').value),
+          page: true
+        });
+      });
+    })
   </script>
 </body>
 
