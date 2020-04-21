@@ -5,6 +5,7 @@ const Store = require('electron-store');
 const { ipcRenderer } = require('electron')
 const WindowsToaster = require('node-notifier').WindowsToaster;
 const schedule = require('node-schedule');
+require('events').EventEmitter.defaultMaxListeners = 100
 const { setSchedule } = require('./utils')
 const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl } = require('./config')
 
@@ -232,16 +233,40 @@ gitBranchBtn.addEventListener('change', (event) => {
         //     await page.waitFor(1000)
         //     await page.screenshot({ path: `./utils/img/1.png` });
         // })
-        Promise.all(typeId.map(async item => {
+        // Promise.all(typeId.map(async item => {
+        //     const { page, browser } = await createPage(`${urlName}/user-login.html`)
+        //     await login(page, async (page) => {
+        //         await page.goto(`${urlName}/bug-view-${item}.html`)
+        //         await page.waitFor(1000)
+        //         await page.waitForSelector('.status-closed')
+        //         let content = await page.$eval('.status-closed', el => el.innerText);
+        //         console.log(content)
+        //         // await page.screenshot({ path: `./utils/img/${item}.png` });
+        //         await page.close()
+        //         try {
+        //             await browser.close();
+        //         } catch (e) {
+        //             console.log(e)
+        //         }
+        //     })
+        // }))
+        typeId.map(async item => {
             const { page, browser } = await createPage(`${urlName}/user-login.html`)
             await login(page, async (page) => {
                 await page.goto(`${urlName}/bug-view-${item}.html`)
                 await page.waitFor(1000)
-                await page.screenshot({ path: `./utils/img/${item}.png` });
+                await page.waitForSelector('.status-closed')
+                let content = await page.$eval('.status-closed', el => el.innerText);
+                console.log(content)
+                // await page.screenshot({ path: `./utils/img/${item}.png` });
                 await page.close()
-                await browser.close();
+                try {
+                    await browser.close();
+                } catch (e) {
+                    console.log(e)
+                }
             })
-        }))
+        })
         gitDataDom.value = JSON.stringify(data)
         console.log(data)
     })
