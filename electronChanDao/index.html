@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-04-21 14:53:24
+ * @LastEditTime: 2020-04-21 23:03:04
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -64,10 +64,12 @@
         </select>
       </label>
       </br>
-      <label for="generateTable">
-        <button id="generateTable" name="generateTable">
+      <label for="generateTable" style="display: flex;margin-top: 10px;">
+        <button class="layui-btn" id="generateTable" name="generateTable">
           生成表格
         </button>
+        <button style="margin-left: 10px;" class="layui-btn layui-btn-danger" data-type="getCheckData">获取已关闭Bug</button>
+        <button style="margin-left: 10px;" class="layui-btn" data-type="getCheckData">还原</button>
       </label>
     </div>
   </div>
@@ -80,10 +82,14 @@
   <script src="./public/layui/layui.js" charset="utf-8"></script>
   <script>
     document.querySelector('#generateTable').addEventListener('click', (e) => {
+      let data = JSON.parse(document.querySelector('#gitData').value)
+      setTable(data)
+    })
+
+    function setTable(data) {
       layui.use('table', function () {
         var table = layui.table,
           form = layui.form;
-
         table.render({
           elem: '#chanDaoTable',
           url: '',
@@ -115,6 +121,26 @@
               title: 'type_id',
               sort: true
             }, {
+              field: 'content',
+              title: 'Bug状态',
+              templet: function (d) {
+                if (d.content === '已关闭') {
+                  return '<span style="color:red;">' + d.content + '</span>'
+                }
+                return d.content ? d.content : ''
+              },
+              sort: true
+            }, {
+              field: 'status',
+              title: '获取状态',
+              templet: function (d) {
+                if (d.status === '成功') {
+                  return '<span style="color:red;">' + d.status + '</span>'
+                }
+                return d.status ? d.status : ''
+              },
+              sort: true
+            }, {
               field: 'parent_ids',
               title: 'parent_ids',
               sort: true
@@ -129,11 +155,11 @@
               sort: true
             }]
           ],
-          data: JSON.parse(document.querySelector('#gitData').value),
-          page: true
+          data: data,
+          limit: 999
         });
       });
-    })
+    }
   </script>
 </body>
 

@@ -173,6 +173,11 @@ let dateObj = {
     startTime: '2020-04-13',
     endTime: '2020-04-17'
 }
+
+if (store.get('chandao-BugStatus')) {
+    gitDataDom.value = JSON.stringify(store.get('chandao-BugStatus'))
+}
+
 scheduleBtn.addEventListener('click', async () => {
     let rule = new schedule.RecurrenceRule();
     let _d = new Date()
@@ -210,7 +215,8 @@ gitBranchBtn.addEventListener('change', (event) => {
         return response.json()
     }).then(async data => {
         const typeId = []
-        const typeObj = {}
+        let typeObj = {}
+        let typeNum = 0
         data.forEach(item => {
             if (item.message.indexOf('Merge branch') > -1) {
                 item.type = 'Merge branch'
@@ -234,28 +240,53 @@ gitBranchBtn.addEventListener('change', (event) => {
         //     await page.waitFor(1000)
         //     await page.screenshot({ path: `./utils/img/1.png` });
         // })
-        // Promise.all(typeId.map(async (item, index) => {
-        //异步
-        // }))
-        for (let x = 0; x < typeId.length; x++) {
-            const { page, browser } = await createPage(`${urlName}/user-login.html`)
-            await login(page, async (page) => {
-                try {
-                    await page.goto(`${urlName}/bug-view-${typeId[x]}.html`)
+        Promise.all(typeId.map(async (item, index) => {
+            if (index % 4 === 0) {
+                await new Promise((resolve) => {
+                    process.nextTick(() => {
+                        resolve()
+                    })
+                })
+                console.log('nexttick')
+            }
+            try {
+                const { page, browser } = await createPage(`${urlName}/user-login.html`)
+                await login(page, async (page) => {
+                    await page.goto(`${urlName}/bug-view-${item}.html`)
                     await page.waitFor(2000)
-                    await page.waitForSelector('.status-closed')
-                    let content = await page.$eval('.status-closed', el => el.innerText);
-                    console.log(content, typeId[x])
-                    // await page.screenshot({ path: `./utils/img/${typeId[x]}.png` });
-                    await page.close()
-                    await browser.close();
-                } catch (e) {
-                    console.log(e)
+                    await page.waitForSelector('.status-bug')
+                    let content = await page.$eval('.status-bug', el => el.innerText);
+                    // await page.screenshot({ path: `./utils/img/${item}.png` });
+                    typeObj[item] = {
+                        content,
+                        status: '成功'
+                    }
+                    typeNum++
+
+                })
+                await page.close()
+                await browser.close();
+            } catch (e) {
+                console.log(e)
+                typeObj[item] = {
+                    content: e.toString(),
+                    status: '失败'
                 }
-            })
-        }
-        gitDataDom.value = JSON.stringify(data)
-        console.log(data)
+                typeNum++
+            }
+            if (typeNum === Object.keys(typeObj).length) {
+                data.forEach(item => {
+                    if (typeObj[item.typeId]) {
+                        item.content = typeObj[item.typeId]['content']
+                        item.status = typeObj[item.typeId]['status']
+                    }
+                })
+                store.set('chandao-BugStatus', data)
+                gitDataDom.value = JSON.stringify(data)
+                console.log(data)
+            }
+            console.log(typeObj)
+        }))
     })
 })
 
