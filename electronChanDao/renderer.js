@@ -3,16 +3,12 @@ const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const Store = require('electron-store');
 const { ipcRenderer } = require('electron')
-const WindowsToaster = require('node-notifier').WindowsToaster;
 const schedule = require('node-schedule');
+const XLSX = require('xlsx');
 require('events').EventEmitter.defaultMaxListeners = 100
 const { setSchedule } = require('./utils')
 const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl } = require('./config')
 
-var Notifier = new WindowsToaster({
-    withFallback: false, // Fallback to Growl or Balloons?
-    customPath: undefined // Relative/Absolute path if you want to use your fork of SnoreToast.exe
-});
 const schema = {
     chandao: {
         type: 'number'
@@ -169,9 +165,10 @@ const gitBranchBtn = document.querySelector('#gitBranch')
 const dateStartInput = document.querySelector('#dateStart')
 const dateEndInput = document.querySelector('#dateEnd')
 const gitDataDom = document.querySelector('#gitData')
+const exportExcelDom = document.querySelector('#exportExcel')
 let dateObj = {
-    startTime: '2020-04-13',
-    endTime: '2020-04-17'
+    startTime: '2020-04-17',
+    endTime: '2020-04-22'
 }
 
 if (store.get('chandao-BugStatus')) {
@@ -191,6 +188,27 @@ scheduleBtn.addEventListener('click', async () => {
     // await main()
 })
 
+exportExcelDom.addEventListener('click', (e) => {
+    console.log(store.get('chandao-BugStatus'))
+    let _d = store.get('chandao-BugStatus')
+    let data = []
+    if (!_d || !_d.length) return
+    let head = Object.keys(_d[0])
+    data.push(head)
+    _d.forEach(item => {
+        let arr = []
+        head.forEach(col => {
+            arr.push(item[col])
+        })
+        data.push(arr)
+    })
+    console.log(data)
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    const new_workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(new_workbook, worksheet, "SheetJS");
+    XLSX.writeFile(new_workbook, `D:\\chrome download\\json_to_excel-${(new Date()).toLocaleDateString('ko-KR')}.xlsx`);
+})
+
 dateStartInput.addEventListener('change', (event) => {
     dateObj.startTime = event.target.value
 })
@@ -201,36 +219,54 @@ dateEndInput.addEventListener('change', (event) => {
 
 gitBranchBtn.addEventListener('change', (event) => {
     let gitBranchValue = event.target.value || 'develop'
-    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${gitBranchValue}&page=1&per_page=999`
-    if (dateObj.startTime) {
-        _url += `&since=${dateObj.startTime}`
-    } if (dateObj.endTime) {
-        _url += `&until=${dateObj.endTime}`
-    }
-    fetch(_url, {
+    let _urlFun = (ref_name) => `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=999`
+    let _url = _urlFun(gitBranchValue)
+    let _urlMaster = _urlFun('master')
+    const httpConfig = {
         headers: {
             'PRIVATE-TOKEN': gitlabAccessToken
         }
-    }).then(response => {
+    }
+    if (dateObj.startTime) {
+        _url += `&since=${dateObj.startTime}`
+        _urlMaster += `&since=${dateObj.startTime}`
+    } if (dateObj.endTime) {
+        _url += `&until=${dateObj.endTime}`
+        _urlMaster += `&until=${dateObj.endTime}`
+    }
+    fetch(_url, httpConfig).then(response => {
         return response.json()
     }).then(async data => {
-        const typeId = []
+        console.log(data)
+        let typeId = new Set()
         let typeObj = {}
-        let typeNum = 0
+        let master_data = []
+        await fetch(_urlMaster, httpConfig).then(res => {
+            return res.json()
+        }).then(master => {
+            master_data = master
+        })
+        data.forEach(d => {
+            master_data.forEach(m => {
+                if (d.message === m.message) {
+                    d.develop2Master = true
+                }
+            })
+        })
         data.forEach(item => {
             if (item.message.indexOf('Merge branch') > -1) {
                 item.type = 'Merge branch'
                 item.typeId = 'Merge branch'
                 return
             }
-            let commitMsgF = item.message.split('@')
+            let commitMsgF = item.message.split('&')
             let commitMsgE
             if (commitMsgF[1]) {
-                commitMsgE = commitMsgF[1].split('&')
-                item.type = commitMsgE[0]
-                item.typeId = parseInt(commitMsgE[1])
+                commitMsgE = commitMsgF[0].split('@')
+                item.type = commitMsgE[1]
+                item.typeId = parseInt(commitMsgF[1])
                 if (item.typeId) {
-                    typeId.push(item.typeId/* +'--'+item.committer_name */)
+                    typeId.add(item.typeId/* +'--'+item.committer_name */)
                 }
             }
         })
@@ -240,7 +276,8 @@ gitBranchBtn.addEventListener('change', (event) => {
         //     await page.waitFor(1000)
         //     await page.screenshot({ path: `./utils/img/1.png` });
         // })
-        Promise.all(typeId.map(async (item, index) => {
+        let typeIdArr = Array.from(typeId)
+        Promise.all(typeIdArr.map(async (item, index) => {
             if (index % 4 === 0) {
                 await new Promise((resolve) => {
                     process.nextTick(() => {
@@ -261,8 +298,6 @@ gitBranchBtn.addEventListener('change', (event) => {
                         content,
                         status: '成功'
                     }
-                    typeNum++
-
                 })
                 await page.close()
                 await browser.close();
@@ -272,9 +307,9 @@ gitBranchBtn.addEventListener('change', (event) => {
                     content: e.toString(),
                     status: '失败'
                 }
-                typeNum++
             }
-            if (typeNum === Object.keys(typeObj).length) {
+            console.log(typeIdArr.length, Object.keys(typeObj).length)
+            if (typeIdArr.length === Object.keys(typeObj).length) {
                 data.forEach(item => {
                     if (typeObj[item.typeId]) {
                         item.content = typeObj[item.typeId]['content']
@@ -283,13 +318,15 @@ gitBranchBtn.addEventListener('change', (event) => {
                 })
                 store.set('chandao-BugStatus', data)
                 gitDataDom.value = JSON.stringify(data)
-                console.log(data)
+
+                console.log(data, typeObj)
             }
-            console.log(typeObj)
         }))
     })
 })
 
+async function test1() {
+    console.log('1111111111')
+}
 
-
-module.exports = main
+module.exports = { main, test1 }

@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-04-21 23:03:04
+ * @LastEditTime: 2020-04-22 15:55:26
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -57,10 +57,10 @@
         <select name="gitBranch" id="gitBranch" title="默认选择develop分支">
           <option value="develop">--</option>
           <option value="develop">develop</option>
-          <option value="feature">feature</option>
+          <!-- <option value="feature">feature</option>
           <option value="hotfix">hotfix</option>
           <option value="master">master</option>
-          <option value="release">release</option>
+          <option value="release">release</option> -->
         </select>
       </label>
       </br>
@@ -68,33 +68,38 @@
         <button class="layui-btn" id="generateTable" name="generateTable">
           生成表格
         </button>
-        <button style="margin-left: 10px;" class="layui-btn layui-btn-danger" data-type="getCheckData">获取已关闭Bug</button>
-        <button style="margin-left: 10px;" class="layui-btn" data-type="getCheckData">还原</button>
+        <button style="margin-left: 10px;" class="layui-btn layui-btn-danger">获取已关闭Bug</button>
+        <button style="margin-left: 10px;" class="layui-btn">还原</button>
+        <button style="margin-left: 10px;" class="layui-btn" id="exportExcel">导出</button>
       </label>
+      <p style="margin-top: 10px;">
+        <button class="layui-btn" id="cherry-pick" data-type="getCheckData">单个commit合并(develop2master)</button>
+      </p>
     </div>
   </div>
   <table class="layui-hide" id="chanDaoTable"></table>
-  <script type="text/javascript">
-  </script>
   <script type="text/javascript">
     require('./renderer')
   </script>
   <script src="./public/layui/layui.js" charset="utf-8"></script>
   <script>
     document.querySelector('#generateTable').addEventListener('click', (e) => {
+      console.log(JSON.parse(document.querySelector('#gitData').value))
       let data = JSON.parse(document.querySelector('#gitData').value)
       setTable(data)
     })
 
     function setTable(data) {
       layui.use('table', function () {
-        var table = layui.table,
-          form = layui.form;
+        let table = layui.table
+        let form = layui.form;
+
         table.render({
           elem: '#chanDaoTable',
           url: '',
           cellMinWidth: 80,
           height: 500,
+          id: 'idTest',
           cols: [
             [{
               type: 'numbers'
@@ -141,22 +146,29 @@
               },
               sort: true
             }, {
+              field: 'develop2Master',
+              title: 'develop2Master',
+              sort: true
+            }, {
               field: 'parent_ids',
               title: 'parent_ids',
-              sort: true
-            }, {
-              field: 'author_name',
-              title: 'author_name',
-              unresize: true,
-              sort: true
-            }, {
-              field: 'author_email',
-              title: 'author_email',
               sort: true
             }]
           ],
           data: data,
           limit: 999
+        });
+        
+        let active = {
+          getCheckData: function () { //获取选中数据
+            var checkStatus = table.checkStatus('idTest'),
+              data = checkStatus.data;
+            console.log(data)
+          }
+        };
+        document.querySelector('#cherry-pick').addEventListener('click', function () {
+          let type = this.getAttribute('data-type');
+          active[type] ? active[type].call(this) : '';
         });
       });
     }
