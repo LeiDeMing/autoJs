@@ -166,10 +166,43 @@ const dateStartInput = document.querySelector('#dateStart')
 const dateEndInput = document.querySelector('#dateEnd')
 const gitDataDom = document.querySelector('#gitData')
 const exportExcelDom = document.querySelector('#exportExcel')
+const btnCloseDom = document.querySelector('#btn-close')
 let dateObj = {
     startTime: '2020-04-17',
     endTime: '2020-04-22'
 }
+let _urlFun = (ref_name, since) => {
+    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=999`
+    if (since) _url += `&since=${since}`
+    return _url
+}
+const httpConfig = {
+    headers: {
+        'PRIVATE-TOKEN': gitlabAccessToken
+    }
+}
+btnCloseDom.addEventListener('click', async (e) => {
+    let t = new Date()
+    let toDay = `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}` //后期改用时间库
+    await fetch(_urlFun('develop', toDay), httpConfig).then(res => {
+        return res.json()
+    }).then(data => {
+        let bugObj = {}
+        data.forEach(item => {
+            if (item.author_email === 'xuan136371773@gmail.com') {
+                let msgF = item.title.split('&')
+                let msgE = msgF[0].split('@')[1]
+                let n = parseInt(msgF[1])
+                bugObj[n] = {
+                    bugId: n,
+                    title: item.title
+                }
+            }
+
+        })
+        console.log(bugObj)
+    })
+})
 
 if (store.get('chandao-BugStatus')) {
     gitDataDom.value = JSON.stringify(store.get('chandao-BugStatus'))
@@ -219,14 +252,9 @@ dateEndInput.addEventListener('change', (event) => {
 
 gitBranchBtn.addEventListener('change', (event) => {
     let gitBranchValue = event.target.value || 'develop'
-    let _urlFun = (ref_name) => `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=999`
     let _url = _urlFun(gitBranchValue)
     let _urlMaster = _urlFun('master')
-    const httpConfig = {
-        headers: {
-            'PRIVATE-TOKEN': gitlabAccessToken
-        }
-    }
+
     if (dateObj.startTime) {
         _url += `&since=${dateObj.startTime}`
         _urlMaster += `&since=${dateObj.startTime}`
