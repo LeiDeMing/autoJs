@@ -232,7 +232,7 @@ gitBranchBtn.addEventListener('change', (event) => {
         _urlMaster += `&since=${dateObj.startTime}`
     } if (dateObj.endTime) {
         _url += `&until=${dateObj.endTime}`
-        _urlMaster += `&until=${dateObj.endTime}`
+        _urlMaster += `&until=${'2020-04-23'}`
     }
     fetch(_url, httpConfig).then(response => {
         return response.json()
