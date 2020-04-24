@@ -5,6 +5,7 @@ const Store = require('electron-store');
 const { ipcRenderer } = require('electron')
 const schedule = require('node-schedule');
 const XLSX = require('xlsx');
+const moment = require('moment')
 require('events').EventEmitter.defaultMaxListeners = 100
 const { setSchedule } = require('./utils')
 const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl } = require('./config')
@@ -167,6 +168,7 @@ const dateEndInput = document.querySelector('#dateEnd')
 const gitDataDom = document.querySelector('#gitData')
 const exportExcelDom = document.querySelector('#exportExcel')
 const btnCloseDom = document.querySelector('#btn-close')
+const viewDoneBugDom = document.querySelector('#view-done-bug')
 let dateObj = {
     startTime: '2020-04-17',
     endTime: '2020-04-22'
@@ -182,26 +184,71 @@ const httpConfig = {
     }
 }
 btnCloseDom.addEventListener('click', async (e) => {
-    let t = new Date()
-    let toDay = `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}` //后期改用时间库
-    await fetch(_urlFun('develop', toDay), httpConfig).then(res => {
+    let bugObj = {}
+    let yestertoday = moment(new Date()).add(-1, 'days').format("YYYY-MM-DD") //后期改用时间库
+    const bugMaster = {}
+    await fetch(_urlFun('develop', yestertoday), httpConfig).then(res => {
         return res.json()
     }).then(data => {
-        let bugObj = {}
         data.forEach(item => {
             if (item.author_email === 'xuan136371773@gmail.com') {
                 let msgF = item.title.split('&')
                 let msgE = msgF[0].split('@')[1]
                 let n = parseInt(msgF[1])
-                bugObj[n] = {
-                    bugId: n,
-                    title: item.title
-                }
+                if (!isNaN(n))
+                    bugObj[n] = {
+                        bugId: n,
+                        title: item.title
+                    }
             }
 
         })
-        console.log(bugObj)
     })
+    console.log(bugObj)
+    Promise.all(Object.keys(bugObj).map(async (item, index) => {
+        if (index % 4 === 0) {
+            await new Promise((resolve) => {
+                process.nextTick(() => {
+                    resolve()
+                })
+            })
+            console.log('nexttick')
+        }
+        try {
+            const { page, browser } = await createPage(`${urlName}/user-login.html`)
+            await login(page, async (page) => {
+                await page.goto(`${urlName}/bug-view-${item}.html`)
+                await page.waitFor(2000)
+                await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
+                await page.waitForSelector('#legendLife table>tbody>tr:nth-child(1)>td')
+                let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
+                let createContent = await page.$eval('#legendLife table>tbody>tr:nth-child(1)>td', el => el.innerText);
+                // await page.screenshot({ path: `./utils/img/${item}.png` });
+                if (pointContent.indexOf('凌明') > -1 || pointContent.indexOf('冯显帅') > -1) {
+                    let _u = createContent.split(' ')[0]
+                    // if (!bugMaster[_u]) {
+                    //     bugMaster[_u] = {
+                    //         'bug创建者': _u,
+                    //         'bugId': item
+                    //     }
+                    // } else {
+                    //     bugMaster[_u] = {
+                    //         'bug创建者': _u,
+                    //         'bugId': `${bugMaster[_u].bugId},${item}`
+                    //     }
+                    // }
+                    if (!bugMaster[_u]) bugMaster[_u] = []
+                    bugMaster[_u].push(item)
+                }
+                console.log(JSON.stringify(bugMaster))
+            })
+            await page.close()
+            await browser.close();
+        } catch (e) {
+            console.log(e)
+
+        }
+    }))
 })
 
 if (store.get('chandao-BugStatus')) {
@@ -234,6 +281,28 @@ exportExcelDom.addEventListener('click', (e) => {
             arr.push(item[col])
         })
         data.push(arr)
+    })
+    console.log(data)
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    const new_workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(new_workbook, worksheet, "SheetJS");
+    XLSX.writeFile(new_workbook, `D:\\chrome download\\json_to_excel-${(new Date()).toLocaleDateString('ko-KR')}.xlsx`);
+})
+
+viewDoneBugDom.addEventListener('click', (e) => {
+    console.log(store.get('chandao-BugStatus'))
+    let _d = store.get('chandao-BugStatus')
+    let data = []
+    let head = ['content', 'typeId', 'point', 'fixUser']
+    data.push(head)
+    _d.forEach(item => {
+        if (item.content === '已解决') {
+            let arr = []
+            head.forEach(col => {
+                arr.push(item[col])
+            })
+            data.push(arr)
+        }
     })
     console.log(data)
     const worksheet = XLSX.utils.aoa_to_sheet(data);
@@ -320,11 +389,17 @@ gitBranchBtn.addEventListener('change', (event) => {
                     await page.goto(`${urlName}/bug-view-${item}.html`)
                     await page.waitFor(2000)
                     await page.waitForSelector('.status-bug')
+                    await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
+                    await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
+                    let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
+                    let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
                     let content = await page.$eval('.status-bug', el => el.innerText);
                     // await page.screenshot({ path: `./utils/img/${item}.png` });
                     typeObj[item] = {
                         content,
-                        status: '成功'
+                        status: '成功',
+                        point: pointContent,
+                        fixUser: fixContent
                     }
                 })
                 await page.close()
@@ -342,6 +417,8 @@ gitBranchBtn.addEventListener('change', (event) => {
                     if (typeObj[item.typeId]) {
                         item.content = typeObj[item.typeId]['content']
                         item.status = typeObj[item.typeId]['status']
+                        item.point = typeObj[item.typeId]['point']
+                        item.fixUser = typeObj[item.typeId]['fixUser']
                     }
                 })
                 store.set('chandao-BugStatus', data)
