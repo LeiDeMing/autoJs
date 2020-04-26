@@ -174,14 +174,16 @@ let dateObj = {
     endTime: '2020-04-22'
 }
 let _urlFun = (ref_name, since) => {
-    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&per_page=99999`
+    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}`
     if (since) _url += `&since=${since}`
     return _url
 }
 const httpConfig = {
     headers: {
         'PRIVATE-TOKEN': gitlabAccessToken,
-        'X-Total': 99999
+        'X-Total': 99999,
+        'X-Page':1,
+        'X-Per-Page':99999
     }
 }
 btnCloseDom.addEventListener('click', async (e) => {
