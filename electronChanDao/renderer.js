@@ -174,13 +174,14 @@ let dateObj = {
     endTime: '2020-04-22'
 }
 let _urlFun = (ref_name, since) => {
-    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=999`
+    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&per_page=99999`
     if (since) _url += `&since=${since}`
     return _url
 }
 const httpConfig = {
     headers: {
-        'PRIVATE-TOKEN': gitlabAccessToken
+        'PRIVATE-TOKEN': gitlabAccessToken,
+        'X-Total': 99999
     }
 }
 btnCloseDom.addEventListener('click', async (e) => {
@@ -329,7 +330,7 @@ gitBranchBtn.addEventListener('change', (event) => {
         _urlMaster += `&since=${dateObj.startTime}`
     } if (dateObj.endTime) {
         _url += `&until=${dateObj.endTime}`
-        _urlMaster += `&until=${'2020-04-23'}`
+        _urlMaster += `&until=${moment(new Date()).format("YYYY-MM-DD")}`
     }
     fetch(_url, httpConfig).then(response => {
         return response.json()
