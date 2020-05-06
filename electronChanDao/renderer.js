@@ -174,16 +174,16 @@ let dateObj = {
     endTime: '2020-04-22'
 }
 let _urlFun = (ref_name, since) => {
-    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}`
+    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=9999`
     if (since) _url += `&since=${since}`
     return _url
 }
 const httpConfig = {
     headers: {
         'PRIVATE-TOKEN': gitlabAccessToken,
-        'X-Total': 99999,
-        'X-Page':1,
-        'X-Per-Page':99999
+        // 'X-Total': 99999,
+        // 'X-Page':1,
+        // 'X-Per-Page':99999
     }
 }
 btnCloseDom.addEventListener('click', async (e) => {
@@ -227,22 +227,22 @@ btnCloseDom.addEventListener('click', async (e) => {
                 let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
                 let createContent = await page.$eval('#legendLife table>tbody>tr:nth-child(1)>td', el => el.innerText);
                 // await page.screenshot({ path: `./utils/img/${item}.png` });
-                if (pointContent.indexOf('凌明') > -1 || pointContent.indexOf('冯显帅') > -1) {
-                    let _u = createContent.split(' ')[0]
-                    // if (!bugMaster[_u]) {
-                    //     bugMaster[_u] = {
-                    //         'bug创建者': _u,
-                    //         'bugId': item
-                    //     }
-                    // } else {
-                    //     bugMaster[_u] = {
-                    //         'bug创建者': _u,
-                    //         'bugId': `${bugMaster[_u].bugId},${item}`
-                    //     }
-                    // }
-                    if (!bugMaster[_u]) bugMaster[_u] = []
-                    bugMaster[_u].push(item)
-                }
+                // if (pointContent.indexOf('凌明') > -1 || pointContent.indexOf('冯显帅') > -1) {
+                let _u = pointContent.split(' ')[0]
+                // if (!bugMaster[_u]) {
+                //     bugMaster[_u] = {
+                //         'bug创建者': _u,
+                //         'bugId': item
+                //     }
+                // } else {
+                //     bugMaster[_u] = {
+                //         'bug创建者': _u,
+                //         'bugId': `${bugMaster[_u].bugId},${item}`
+                //     }
+                // }
+                if (!bugMaster[_u]) bugMaster[_u] = []
+                bugMaster[_u].push(item)
+                // }
                 console.log(JSON.stringify(bugMaster))
             })
             await page.close()
