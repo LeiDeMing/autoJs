@@ -335,6 +335,7 @@ gitBranchBtn.addEventListener('change', (event) => {
         _urlMaster += `&until=${moment(new Date()).format("YYYY-MM-DD")}`
     }
     fetch(_url, httpConfig).then(response => {
+        console.log(response.headers.get("link"))
         return response.json()
     }).then(async data => {
         console.log(data)
@@ -377,59 +378,70 @@ gitBranchBtn.addEventListener('change', (event) => {
         //     await page.screenshot({ path: `./utils/img/1.png` });
         // })
         let typeIdArr = Array.from(typeId)
-        Promise.all(typeIdArr.map(async (item, index) => {
-            if (index % 4 === 0) {
-                await new Promise((resolve) => {
-                    process.nextTick(() => {
-                        resolve()
+        let _typeIdArr = []
+        let num6Arr = []
+        typeIdArr.forEach((item, index) => {
+            num6Arr.push(item)
+            if ((index + 1) % 6 === 0 || ((typeIdArr.length === index + 1) && (index + 1) % 6 !== 0)) {
+                _typeIdArr.push(JSON.parse(JSON.stringify(num6Arr)))
+                num6Arr = []
+            }
+        })
+        for (let y = 0; y < _typeIdArr.length; y++) {
+            let inArr = _typeIdArr[y]
+            // _typeIdArr.forEach(async inArr => {
+            console.log('nexttick')
+            await Promise.all(inArr.map(async (item, index) => {
+                // for (let x = 0; x < typeIdArr.length; x++) {
+                // let index = x
+                // let item = typeIdArr[x]
+                try {
+                    const { page, browser } = await createPage(`${urlName}/user-login.html`)
+                    await login(page, async (page) => {
+                        await page.goto(`${urlName}/bug-view-${item}.html`)
+                        await page.waitFor(2000)
+                        await page.waitForSelector('.status-bug')
+                        await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
+                        await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
+                        let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
+                        let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
+                        let content = await page.$eval('.status-bug', el => el.innerText);
+                        // await page.screenshot({ path: `./utils/img/${item}.png` });
+                        typeObj[item] = {
+                            content,
+                            status: '成功',
+                            point: pointContent,
+                            fixUser: fixContent
+                        }
                     })
-                })
-                console.log('nexttick')
-            }
-            try {
-                const { page, browser } = await createPage(`${urlName}/user-login.html`)
-                await login(page, async (page) => {
-                    await page.goto(`${urlName}/bug-view-${item}.html`)
-                    await page.waitFor(2000)
-                    await page.waitForSelector('.status-bug')
-                    await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
-                    await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
-                    let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
-                    let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
-                    let content = await page.$eval('.status-bug', el => el.innerText);
-                    // await page.screenshot({ path: `./utils/img/${item}.png` });
+                    await page.close()
+                    await browser.close();
+                } catch (e) {
+                    console.log(e)
                     typeObj[item] = {
-                        content,
-                        status: '成功',
-                        point: pointContent,
-                        fixUser: fixContent
+                        content: e.toString(),
+                        status: '失败'
                     }
-                })
-                await page.close()
-                await browser.close();
-            } catch (e) {
-                console.log(e)
-                typeObj[item] = {
-                    content: e.toString(),
-                    status: '失败'
                 }
-            }
-            console.log(typeIdArr.length, Object.keys(typeObj).length)
-            if (typeIdArr.length === Object.keys(typeObj).length) {
-                data.forEach(item => {
-                    if (typeObj[item.typeId]) {
-                        item.content = typeObj[item.typeId]['content']
-                        item.status = typeObj[item.typeId]['status']
-                        item.point = typeObj[item.typeId]['point']
-                        item.fixUser = typeObj[item.typeId]['fixUser']
-                    }
-                })
-                store.set('chandao-BugStatus', data)
-                gitDataDom.value = JSON.stringify(data)
+                console.log(typeIdArr.length, Object.keys(typeObj).length)
+                if (typeIdArr.length === Object.keys(typeObj).length) {
+                    data.forEach(item => {
+                        if (typeObj[item.typeId]) {
+                            item.content = typeObj[item.typeId]['content']
+                            item.status = typeObj[item.typeId]['status']
+                            item.point = typeObj[item.typeId]['point']
+                            item.fixUser = typeObj[item.typeId]['fixUser']
+                        }
+                    })
+                    store.set('chandao-BugStatus', data)
+                    gitDataDom.value = JSON.stringify(data)
 
-                console.log(data, typeObj)
-            }
-        }))
+                    console.log(data, typeObj)
+                }
+                // }
+            }))
+            // })
+        }
     })
 })
 
