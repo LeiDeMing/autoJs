@@ -415,25 +415,21 @@ gitBranchBtn.addEventListener('change', async (event) => {
         }
     })
     const { browser } = await createPage('', false)
-    let loginFlag = true
+    let page = await browser.newPage()
+    page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
+    await page.waitFor(4000)
+    await login(page)
+    gitBranchAllDom.innerHTML = typeIdArr.length
     for (let y = 0; y < _typeIdArr.length; y++) {
         let inArr = _typeIdArr[y]
         // _typeIdArr.forEach(async inArr => {
         console.log('nexttick')
-
-        // await Promise.all(inArr.map(async (item, index) => {
-        for (let x = 0; x < inArr.length; x++) {
+        await Promise.all(inArr.map(async (item, index) => {
+            // for (let x = 0; x < inArr.length; x++) {
             // let index = x
-            let item = inArr[x]
+            // let item = inArr[x]
             try {
                 let page = await browser.newPage()
-                if (loginFlag) {
-                    gitBranchAllDom.innerHTML = typeIdArr.length
-                    loginFlag = false
-                    page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
-                    await page.waitFor(4000)
-                    await login(page)
-                }
                 await page.goto(`${urlName}/bug-view-${item}.html`, { waitUntil: 'domcontentloaded' })
                 await page.waitForSelector('.status-bug')
                 await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
@@ -457,6 +453,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
             }
             // await browser.close();
             console.log(typeIdArr.length, Object.keys(typeObj).length)
+            gitBranchRequestedDom.innerHTML = Object.keys(typeObj).length
             if (typeIdArr.length === Object.keys(typeObj).length) {
                 data.forEach(item => {
                     if (typeObj[item.typeId]) {
@@ -466,13 +463,13 @@ gitBranchBtn.addEventListener('change', async (event) => {
                         item.fixUser = typeObj[item.typeId]['fixUser']
                     }
                 })
-                gitBranchRequestedDom.innerHTML = Object.keys(typeObj).length
                 store.set('chandao-BugStatus', data)
                 gitDataDom.value = JSON.stringify(data)
+                await browser.close();
                 console.log(data, typeObj)
             }
-        }
-        // }))
+            // }
+        }))
         // })
     }
 })
