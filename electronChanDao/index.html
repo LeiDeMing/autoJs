@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-07 09:10:55
+ * @LastEditTime: 2020-05-07 13:41:15
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -65,6 +65,9 @@
           <option value="release">release</option> -->
         </select>
       </label>
+      总数：<span id="gitBranch-all">0</span>
+      --- 
+      已请求：<span id="gitBranch-requested">0</span>
       </br>
       <label for="generateTable" style="display: flex;margin-top: 10px;">
         <button class="layui-btn" id="generateTable" name="generateTable">
@@ -167,7 +170,7 @@
           data: data,
           limit: 999
         });
-        
+
         let active = {
           getCheckData: function () { //获取选中数据
             var checkStatus = table.checkStatus('idTest'),

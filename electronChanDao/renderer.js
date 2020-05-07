@@ -173,6 +173,8 @@ const gitDataDom = document.querySelector('#gitData')
 const exportExcelDom = document.querySelector('#exportExcel')
 const btnCloseDom = document.querySelector('#btn-close')
 const viewDoneBugDom = document.querySelector('#view-done-bug')
+const gitBranchAllDom = document.querySelector('#gitBranch-all')
+const gitBranchRequestedDom = document.querySelector('#gitBranch-requested')
 let dateObj = {
     startTime: '2020-04-17',
     endTime: '2020-04-22'
@@ -426,6 +428,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
             try {
                 let page = await browser.newPage()
                 if (loginFlag) {
+                    gitBranchAllDom.innerHTML = typeIdArr.length
                     loginFlag = false
                     page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
                     await page.waitFor(4000)
@@ -454,20 +457,20 @@ gitBranchBtn.addEventListener('change', async (event) => {
             }
             // await browser.close();
             console.log(typeIdArr.length, Object.keys(typeObj).length)
-            // if (typeIdArr.length === Object.keys(typeObj).length) {
-            data.forEach(item => {
-                if (typeObj[item.typeId]) {
-                    item.content = typeObj[item.typeId]['content']
-                    item.status = typeObj[item.typeId]['status']
-                    item.point = typeObj[item.typeId]['point']
-                    item.fixUser = typeObj[item.typeId]['fixUser']
-                }
-            })
-            store.set('chandao-BugStatus', data)
-            gitDataDom.value = JSON.stringify(data)
-
-            console.log(data, typeObj)
-            // }
+            if (typeIdArr.length === Object.keys(typeObj).length) {
+                data.forEach(item => {
+                    if (typeObj[item.typeId]) {
+                        item.content = typeObj[item.typeId]['content']
+                        item.status = typeObj[item.typeId]['status']
+                        item.point = typeObj[item.typeId]['point']
+                        item.fixUser = typeObj[item.typeId]['fixUser']
+                    }
+                })
+                gitBranchRequestedDom.innerHTML = Object.keys(typeObj).length
+                store.set('chandao-BugStatus', data)
+                gitDataDom.value = JSON.stringify(data)
+                console.log(data, typeObj)
+            }
         }
         // }))
         // })
