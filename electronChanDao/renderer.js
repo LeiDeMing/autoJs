@@ -19,15 +19,18 @@ const store = new Store({ schema });
 
 const chromePath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
 
-async function createPage(url) {
+async function createPage(url, selfPage = true) {
     let browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         executablePath: chromePath
-    });
-    const page = await browser.newPage();
-    await page.goto(url);
-    await page.setViewport({ width: 1366, height: 625 })
-    return { page, browser }
+    })
+    if (selfPage) {
+        const page = await browser.newPage();
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        await page.setViewport({ width: 1366, height: 625 })
+        return { page, browser }
+    }
+    return { browser }
 
 }
 
@@ -39,6 +42,7 @@ async function login(page, callback) {
     console.log('login')
 
     callback && await callback(page)
+    return page
 }
 
 async function setPupper(url = '') {
@@ -174,7 +178,7 @@ let dateObj = {
     endTime: '2020-04-22'
 }
 let _urlFun = (ref_name, since) => {
-    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=9999`
+    let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=100`
     if (since) _url += `&since=${since}`
     return _url
 }
@@ -220,8 +224,7 @@ btnCloseDom.addEventListener('click', async (e) => {
         try {
             const { page, browser } = await createPage(`${urlName}/user-login.html`)
             await login(page, async (page) => {
-                await page.goto(`${urlName}/bug-view-${item}.html`)
-                await page.waitFor(2000)
+                await page.goto(`${urlName}/bug-view-${item}.html`, { waitUntil: 'domcontentloaded' })
                 await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
                 await page.waitForSelector('#legendLife table>tbody>tr:nth-child(1)>td')
                 let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
@@ -322,7 +325,7 @@ dateEndInput.addEventListener('change', (event) => {
     dateObj.endTime = event.target.value
 })
 
-gitBranchBtn.addEventListener('change', (event) => {
+gitBranchBtn.addEventListener('change', async (event) => {
     let gitBranchValue = event.target.value || 'develop'
     let _url = _urlFun(gitBranchValue)
     let _urlMaster = _urlFun('master')
@@ -334,115 +337,141 @@ gitBranchBtn.addEventListener('change', (event) => {
         _url += `&until=${dateObj.endTime}`
         _urlMaster += `&until=${moment(new Date()).format("YYYY-MM-DD")}`
     }
-    fetch(_url, httpConfig).then(response => {
-        console.log(response.headers.get("link"))
-        return response.json()
-    }).then(async data => {
-        console.log(data)
-        let typeId = new Set()
-        let typeObj = {}
-        let master_data = []
+    let data = []
+    let master_data = []
+    let typeId = new Set()
+    let typeObj = {}
+
+    async function getDevelopData(page = 1) {
+        await fetch(`${_url}&page=${page}`, httpConfig).then(response => {
+            return response.json()
+        }).then(async d => {
+            console.log(page)
+            if (d.length >= 100) {
+                let _p = page
+                _p++
+                await getDevelopData(_p)
+            }
+            data = [...d, ...data]
+        })
+    }
+
+    async function getMasterData(page = 1) {
         await fetch(_urlMaster, httpConfig).then(res => {
             return res.json()
-        }).then(master => {
-            master_data = master
-        })
-        data.forEach(d => {
-            master_data.forEach(m => {
-                if (d.message === m.message) {
-                    d.develop2Master = true
-                }
-            })
-        })
-        data.forEach(item => {
-            if (item.message.indexOf('Merge branch') > -1) {
-                item.type = 'Merge branch'
-                item.typeId = 'Merge branch'
-                return
+        }).then(async master => {
+            if (master.length >= 100) {
+                let _p = page
+                _p++
+                await getMasterData(_p)
             }
-            let commitMsgF = item.message.split('&')
-            let commitMsgE
-            if (commitMsgF[1]) {
-                commitMsgE = commitMsgF[0].split('@')
-                item.type = commitMsgE[1]
-                item.typeId = parseInt(commitMsgF[1])
-                if (item.typeId) {
-                    typeId.add(item.typeId/* +'--'+item.committer_name */)
-                }
-            }
+            master_data = [...master, ...master_data]
         })
-        console.log(typeId)
-        // await login(page, async (page) => {
-        //     await page.goto(`${urlName}/bug-view-2395.html`)
-        //     await page.waitFor(1000)
-        //     await page.screenshot({ path: `./utils/img/1.png` });
-        // })
-        let typeIdArr = Array.from(typeId)
-        let _typeIdArr = []
-        let num6Arr = []
-        typeIdArr.forEach((item, index) => {
-            num6Arr.push(item)
-            if ((index + 1) % 6 === 0 || ((typeIdArr.length === index + 1) && (index + 1) % 6 !== 0)) {
-                _typeIdArr.push(JSON.parse(JSON.stringify(num6Arr)))
-                num6Arr = []
-            }
-        })
-        for (let y = 0; y < _typeIdArr.length; y++) {
-            let inArr = _typeIdArr[y]
-            // _typeIdArr.forEach(async inArr => {
-            console.log('nexttick')
-            await Promise.all(inArr.map(async (item, index) => {
-                // for (let x = 0; x < typeIdArr.length; x++) {
-                // let index = x
-                // let item = typeIdArr[x]
-                try {
-                    const { page, browser } = await createPage(`${urlName}/user-login.html`)
-                    await login(page, async (page) => {
-                        await page.goto(`${urlName}/bug-view-${item}.html`)
-                        await page.waitFor(2000)
-                        await page.waitForSelector('.status-bug')
-                        await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
-                        await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
-                        let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
-                        let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
-                        let content = await page.$eval('.status-bug', el => el.innerText);
-                        // await page.screenshot({ path: `./utils/img/${item}.png` });
-                        typeObj[item] = {
-                            content,
-                            status: '成功',
-                            point: pointContent,
-                            fixUser: fixContent
-                        }
-                    })
-                    await page.close()
-                    await browser.close();
-                } catch (e) {
-                    console.log(e)
-                    typeObj[item] = {
-                        content: e.toString(),
-                        status: '失败'
-                    }
-                }
-                console.log(typeIdArr.length, Object.keys(typeObj).length)
-                if (typeIdArr.length === Object.keys(typeObj).length) {
-                    data.forEach(item => {
-                        if (typeObj[item.typeId]) {
-                            item.content = typeObj[item.typeId]['content']
-                            item.status = typeObj[item.typeId]['status']
-                            item.point = typeObj[item.typeId]['point']
-                            item.fixUser = typeObj[item.typeId]['fixUser']
-                        }
-                    })
-                    store.set('chandao-BugStatus', data)
-                    gitDataDom.value = JSON.stringify(data)
+    }
 
-                    console.log(data, typeObj)
-                }
-                // }
-            }))
-            // })
+    await getDevelopData()
+    await getMasterData()
+    console.log(data, master_data)
+
+    data.forEach(d => {
+        master_data.forEach(m => {
+            if (d.message === m.message) {
+                d.develop2Master = true
+            }
+        })
+    })
+    data.forEach(item => {
+        if (item.message.indexOf('Merge branch') > -1) {
+            item.type = 'Merge branch'
+            item.typeId = 'Merge branch'
+            return
+        }
+        let commitMsgF = item.message.split('&')
+        let commitMsgE
+        if (commitMsgF[1]) {
+            commitMsgE = commitMsgF[0].split('@')
+            item.type = commitMsgE[1]
+            item.typeId = parseInt(commitMsgF[1])
+            if (item.typeId) {
+                typeId.add(item.typeId/* +'--'+item.committer_name */)
+            }
         }
     })
+    console.log(typeId)
+    // await login(page, async (page) => {
+    //     await page.goto(`${urlName}/bug-view-2395.html`, { waitUntil: 'domcontentloaded' })
+    //     await page.screenshot({ path: `./utils/img/1.png` });
+    // })
+    let typeIdArr = Array.from(typeId)
+    let _typeIdArr = []
+    let num6Arr = []
+    typeIdArr.forEach((item, index) => {
+        num6Arr.push(item)
+        if ((index + 1) % 6 === 0 || ((typeIdArr.length === index + 1) && (index + 1) % 6 !== 0)) {
+            _typeIdArr.push(JSON.parse(JSON.stringify(num6Arr)))
+            num6Arr = []
+        }
+    })
+    const { browser } = await createPage('', false)
+    let loginFlag = true
+    for (let y = 0; y < _typeIdArr.length; y++) {
+        let inArr = _typeIdArr[y]
+        // _typeIdArr.forEach(async inArr => {
+        console.log('nexttick')
+
+        // await Promise.all(inArr.map(async (item, index) => {
+        for (let x = 0; x < inArr.length; x++) {
+            // let index = x
+            let item = inArr[x]
+            try {
+                let page = await browser.newPage()
+                if (loginFlag) {
+                    loginFlag = false
+                    page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
+                    await page.waitFor(4000)
+                    await login(page)
+                }
+                await page.goto(`${urlName}/bug-view-${item}.html`, { waitUntil: 'domcontentloaded' })
+                await page.waitForSelector('.status-bug')
+                await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
+                await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
+                let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
+                let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
+                let content = await page.$eval('.status-bug', el => el.innerText);
+                typeObj[item] = {
+                    content,
+                    status: '成功',
+                    point: pointContent,
+                    fixUser: fixContent
+                }
+                await page.close()
+            } catch (e) {
+                console.log(e)
+                typeObj[item] = {
+                    content: e.toString(),
+                    status: '失败'
+                }
+            }
+            // await browser.close();
+            console.log(typeIdArr.length, Object.keys(typeObj).length)
+            // if (typeIdArr.length === Object.keys(typeObj).length) {
+            data.forEach(item => {
+                if (typeObj[item.typeId]) {
+                    item.content = typeObj[item.typeId]['content']
+                    item.status = typeObj[item.typeId]['status']
+                    item.point = typeObj[item.typeId]['point']
+                    item.fixUser = typeObj[item.typeId]['fixUser']
+                }
+            })
+            store.set('chandao-BugStatus', data)
+            gitDataDom.value = JSON.stringify(data)
+
+            console.log(data, typeObj)
+            // }
+        }
+        // }))
+        // })
+    }
 })
 
 async function test1() {
