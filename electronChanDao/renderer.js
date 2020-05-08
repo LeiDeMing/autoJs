@@ -518,6 +518,31 @@ cherryPick = async (typeId) => {
     page.goto(`${gitlabUrl}/front/presap-nifty-react/commits/develop?utf8=✓&search=1909`, { waitUntil: 'domcontentloaded' })
     await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
     await page.screenshot({ path: `./utils/img/login.png`, fullPage: true });
-
 }
-module.exports = { main, cherryPick }
+
+onSolvedHandle = async (obj) => {
+    const { browser } = await createPage('', false)
+    let page = await browser.newPage()
+    page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
+    await page.waitFor(2000)
+    await login(page)
+    await page.goto(`${urlName}/bug-view-${/* obj.typeId */2775}.html`, { waitUntil: 'domcontentloaded' })
+    await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
+    let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
+    await page.waitForSelector('.btn-toolbar > a:nth-child(4)')
+    let solved = await page.$eval('.btn-toolbar > a:nth-child(4)', el => el.innerText);
+    if (solved === ' 解决' && pointContent.indexOf('凌明') > -1) {
+        await page.click('.btn-toolbar > a:nth-child(4)')
+        await page.waitFor(3000)
+        const elementHandle = await page.$('#iframe-triggerModal');
+        const frame = await elementHandle.contentFrame();
+        await frame.waitForSelector('#resolution')
+        await frame.select('#resolution', 'fixed')
+        await frame.waitForSelector('#resolvedBuild')
+        await frame.select('#resolvedBuild', 'trunk')
+        await frame.click('button[type=submit]')
+        await frame.waitFor(3000)
+        await page.screenshot({ path: `./utils/img/${/* obj.typeId */2775}.png`, fullPage: true });
+    }
+}
+module.exports = { main, cherryPick, onSolvedHandle }

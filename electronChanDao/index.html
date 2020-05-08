@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-08 12:40:24
+ * @LastEditTime: 2020-05-08 16:32:55
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -100,12 +100,14 @@
   </script>
   <script src="./public/layui/layui.js" charset="utf-8"></script>
   <script type="text/html" id="btn-develop2Master">
+    <a class="layui-btn layui-btn-xs" lay-event="solved" title="已解决">已解决</a>
     <a class="layui-btn layui-btn-xs" lay-event="preview" title="预览">预览</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cherry-pick" title="Develop To Master">cherry-pick</a>
   </script>
   <script>
     const {
-      cherryPick
+      cherryPick,
+      onSolvedHandle
     } = require('./renderer')
     const {
       getPicUrl
@@ -123,7 +125,7 @@
       }
       // do something
     })
-    cherryPick()
+    // cherryPick()
     function setTable(data) {
       layui.use('table', function () {
         let table = layui.table
@@ -212,6 +214,8 @@
             if (data.typeId) {
               qiniuImgDom.src = getPicUrl(data.typeId)
             }
+          } else if (obj.event === 'solved') {
+            onSolvedHandle(data)
           }
         });
         let active = {
