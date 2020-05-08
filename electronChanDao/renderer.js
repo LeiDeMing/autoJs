@@ -8,7 +8,8 @@ const XLSX = require('xlsx');
 const moment = require('moment')
 require('events').EventEmitter.defaultMaxListeners = 100
 const { setSchedule } = require('./utils')
-const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl } = require('./config')
+const { formUploader, getPicUrl } = require('./middlewares/qiniu')
+const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl, gitLabName, gitLabPass } = require('./config')
 
 const schema = {
     chandao: {
@@ -177,8 +178,8 @@ const viewCloseBugDom = document.querySelector('#view-close-bug')
 const gitBranchAllDom = document.querySelector('#gitBranch-all')
 const gitBranchRequestedDom = document.querySelector('#gitBranch-requested')
 let dateObj = {
-    startTime: '2020-04-17',
-    endTime: '2020-04-22'
+    startTime: '2020-04-16',
+    endTime: '2020-05-08'
 }
 let _urlFun = (ref_name, since) => {
     let _url = `${gitlabUrl}/api/v4/projects/23/repository/commits?ref_name=${ref_name}&page=1&per_page=100`
@@ -376,7 +377,6 @@ gitBranchBtn.addEventListener('change', async (event) => {
         await fetch(`${_url}&page=${page}`, httpConfig).then(response => {
             return response.json()
         }).then(async d => {
-            console.log(page)
             if (d.length >= 100) {
                 let _p = page
                 _p++
@@ -428,10 +428,6 @@ gitBranchBtn.addEventListener('change', async (event) => {
         }
     })
     console.log(typeId)
-    // await login(page, async (page) => {
-    //     await page.goto(`${urlName}/bug-view-2395.html`, { waitUntil: 'domcontentloaded' })
-    //     await page.screenshot({ path: `./utils/img/1.png` });
-    // })
     let typeIdArr = Array.from(typeId)
     let _typeIdArr = []
     let num6Arr = []
@@ -474,6 +470,8 @@ gitBranchBtn.addEventListener('change', async (event) => {
                     fixUser: fixContent,
                     title
                 }
+                await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                 await page.close()
             } catch (e) {
                 console.log(e)
@@ -482,7 +480,6 @@ gitBranchBtn.addEventListener('change', async (event) => {
                     status: '失败'
                 }
             }
-            // await browser.close();
             console.log(typeIdArr.length, Object.keys(typeObj).length)
             gitBranchRequestedDom.innerHTML = Object.keys(typeObj).length
             if (typeIdArr.length === Object.keys(typeObj).length) {
@@ -497,7 +494,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
                 })
                 store.set('chandao-BugStatus', data)
                 gitDataDom.value = JSON.stringify(data)
-                await browser.close();
+                // await browser.close();
                 console.log(data, typeObj)
             }
             // }
@@ -506,8 +503,21 @@ gitBranchBtn.addEventListener('change', async (event) => {
     }
 })
 
-async function test1() {
-    console.log('1111111111')
-}
+cherryPick = async (typeId) => {
+    const { browser } = await createPage('', false)
+    let page = await browser.newPage()
+    await page.setViewport({ width: 1366, height: 625 })
+    page.goto(`${gitlabUrl}/users/sign_in`, { waitUntil: 'domcontentloaded' })
+    await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+    console.log('sign_in.html')
+    await page.type('#user_login', gitLabName);
+    await page.type('#user_password', gitLabPass);
+    await page.click('input[type=submit]');
+    await page.waitFor(2000)
+    console.log('login')
+    page.goto(`${gitlabUrl}/front/presap-nifty-react/commits/develop?utf8=✓&search=1909`, { waitUntil: 'domcontentloaded' })
+    await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+    await page.screenshot({ path: `./utils/img/login.png`, fullPage: true });
 
-module.exports = { main, test1 }
+}
+module.exports = { main, cherryPick }
