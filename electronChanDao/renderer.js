@@ -173,6 +173,7 @@ const gitDataDom = document.querySelector('#gitData')
 const exportExcelDom = document.querySelector('#exportExcel')
 const btnCloseDom = document.querySelector('#btn-close')
 const viewDoneBugDom = document.querySelector('#view-done-bug')
+const viewCloseBugDom = document.querySelector('#view-close-bug')
 const gitBranchAllDom = document.querySelector('#gitBranch-all')
 const gitBranchRequestedDom = document.querySelector('#gitBranch-requested')
 let dateObj = {
@@ -318,6 +319,33 @@ viewDoneBugDom.addEventListener('click', (e) => {
     XLSX.utils.book_append_sheet(new_workbook, worksheet, "SheetJS");
     XLSX.writeFile(new_workbook, `D:\\chrome download\\json_to_excel-${(new Date()).toLocaleDateString('ko-KR')}.xlsx`);
 })
+viewCloseBugDom.addEventListener('click', (e) => {
+    console.log(store.get('chandao-BugStatus'))
+    let _d = store.get('chandao-BugStatus')
+    let data = []
+    let head = ['typeId', 'title', 'committer_name']
+    const pureArr = []
+    data.push(head)
+    _d.forEach(item => {
+        if (item.content === '已关闭' && !item.develop2Master) {
+            if (!pureArr.includes(item.typeId)) {
+                pureArr.push(item.typeId)
+            } else {
+                return
+            }
+            let arr = []
+            head.forEach(col => {
+                arr.push(item[col])
+            })
+            data.push(arr)
+        }
+    })
+    console.log(data)
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    const new_workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(new_workbook, worksheet, "SheetJS");
+    XLSX.writeFile(new_workbook, `D:\\chrome download\\json_to_excel-${(new Date()).toLocaleDateString('ko-KR')}.xlsx`);
+})
 
 dateStartInput.addEventListener('change', (event) => {
     dateObj.startTime = event.target.value
@@ -434,14 +462,17 @@ gitBranchBtn.addEventListener('change', async (event) => {
                 await page.waitForSelector('.status-bug')
                 await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
                 await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
+                await page.waitForSelector('.page-title > span:nth-child(2)')
                 let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
                 let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
                 let content = await page.$eval('.status-bug', el => el.innerText);
+                let title = await page.$eval('.page-title > span:nth-child(2)', el => el.innerText)
                 typeObj[item] = {
                     content,
                     status: '成功',
                     point: pointContent,
-                    fixUser: fixContent
+                    fixUser: fixContent,
+                    title
                 }
                 await page.close()
             } catch (e) {
@@ -461,6 +492,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
                         item.status = typeObj[item.typeId]['status']
                         item.point = typeObj[item.typeId]['point']
                         item.fixUser = typeObj[item.typeId]['fixUser']
+                        item.title = typeObj[item.typeId]['title']
                     }
                 })
                 store.set('chandao-BugStatus', data)

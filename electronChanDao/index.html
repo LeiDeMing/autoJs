@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-07 13:41:15
+ * @LastEditTime: 2020-05-08 09:09:16
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -24,7 +24,7 @@
   </style>
 </head>
 
-<body>
+<body style="margin-bottom: 100px;">
   <input type="hidden" id="gitData">
   <div class="contain">
     <div>
@@ -66,7 +66,7 @@
         </select>
       </label>
       总数：<span id="gitBranch-all">0</span>
-      --- 
+      ---
       已请求：<span id="gitBranch-requested">0</span>
       </br>
       <label for="generateTable" style="display: flex;margin-top: 10px;">
@@ -83,17 +83,21 @@
       </p>
       <p style="margin-top: 10px;">
         <button class="layui-btn" id="view-done-bug">导出已解决Bug</button>
+        <button class="layui-btn" id="view-close-bug">导出已关闭Bug</button>
       </p>
       <p style="color:red">
-        1. 2679要比2671先合入master
+        1. bugID2508其实对应的是bugID2666
       </p>
     </div>
   </div>
-  <table class="layui-hide" id="chanDaoTable"></table>
+  <table class="layui-hide" id="chanDaoTable" lay-filter="chanDaoTable"></table>
   <script type="text/javascript">
     require('./renderer')
   </script>
   <script src="./public/layui/layui.js" charset="utf-8"></script>
+  <script type="text/html" id="btn-develop2Master">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cherry-pick" title="Develop To Master">cherry-pick</a>
+  </script>
   <script>
     document.querySelector('#generateTable').addEventListener('click', (e) => {
       console.log(JSON.parse(document.querySelector('#gitData').value))
@@ -162,6 +166,10 @@
               title: 'develop2Master',
               sort: true
             }, {
+              field: '',
+              title: '操作',
+              toolbar: '#btn-develop2Master'
+            }, {
               field: 'parent_ids',
               title: 'parent_ids',
               sort: true
@@ -171,6 +179,14 @@
           limit: 999
         });
 
+        table.on('tool(chanDaoTable)', function (obj) {
+          var data = obj.data;
+          if (obj.event === 'cherry-pick' && data.content === '已关闭') {
+            layer.confirm('Develop 2 Master ?', function (index) {
+              console.log(data)
+            });
+          }
+        });
         let active = {
           getCheckData: function () { //获取选中数据
             var checkStatus = table.checkStatus('idTest'),
