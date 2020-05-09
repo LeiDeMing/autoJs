@@ -8,7 +8,7 @@ const XLSX = require('xlsx');
 const moment = require('moment')
 require('events').EventEmitter.defaultMaxListeners = 100
 const { setSchedule } = require('./utils')
-const { formUploader, getPicUrl } = require('./middlewares/qiniu')
+const { formUploader, getDataMsg, deleteData } = require('./middlewares/qiniu')
 const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl, gitLabName, gitLabPass } = require('./config')
 
 const schema = {
@@ -357,6 +357,7 @@ dateEndInput.addEventListener('change', (event) => {
 })
 
 gitBranchBtn.addEventListener('change', async (event) => {
+    let cacheData = store.get('chandao-BugStatus')
     let gitBranchValue = event.target.value || 'develop'
     let _url = _urlFun(gitBranchValue)
     let _urlMaster = _urlFun('master')
@@ -468,10 +469,35 @@ gitBranchBtn.addEventListener('change', async (event) => {
                     status: '成功',
                     point: pointContent,
                     fixUser: fixContent,
-                    title
+                    title,
+                    qiniu: true
                 }
-                await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                // const isHave = await getDataMsg(item)
+
+                let cacheRow = null
+                for (let x = 0; x < cacheData.length; x++) {
+                    if (typeObj[cacheData[x]['typeId']]) {
+                        cacheRow = cacheData[x]
+                        break;
+                    }
+                }
+                if (cacheRow) {
+                    if (!cacheRow.qiniu) {
+                        await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                        formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                    } else {
+                        for (let x = 0; x < data.length; x++) {
+                            if (data[x]['typeId'] === cacheRow['typeId'] && data[x]['content'] !== typeObj[item]['content']) {
+                                await deleteData(item)
+                                formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                    formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                }
                 await page.close()
             } catch (e) {
                 console.log(e)
@@ -490,6 +516,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
                         item.point = typeObj[item.typeId]['point']
                         item.fixUser = typeObj[item.typeId]['fixUser']
                         item.title = typeObj[item.typeId]['title']
+                        item.qiniu = typeObj[item.typeId]['qiniu']
                     }
                 })
                 store.set('chandao-BugStatus', data)
