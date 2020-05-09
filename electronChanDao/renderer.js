@@ -484,7 +484,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
                 try {
                     if (cacheRow) {
                         if (!cacheRow.qiniu) {
-                            console.log(1,'qiniu create')
+                            console.log(1, 'qiniu create')
                             await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
                             formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                         } else {
@@ -499,7 +499,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
                             }
                         }
                     } else {
-                        console.log(3,'qiniu create')
+                        console.log(3, 'qiniu create')
                         await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
                         formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                     }
@@ -589,6 +589,9 @@ onSolvedHandle = async (obj) => {
             if (item.id === obj.id)
                 item.content = '已解决'
         })
+        await deleteData(obj.typeId)
+        await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
+        await formUploader(obj.typeId, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${obj.typeId}.png`)
         store.set('chandao-BugStatus', cacheData)
         gitDataDom.value = JSON.stringify(cacheData)
         return 200
