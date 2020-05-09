@@ -523,6 +523,7 @@ cherryPick = async (typeId) => {
 onSolvedHandle = async (obj) => {
     const { browser } = await createPage('', false)
     let page = await browser.newPage()
+    let cacheData = store.get('chandao-BugStatus')
     page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
     await page.waitFor(2000)
     await login(page)
@@ -543,10 +544,19 @@ onSolvedHandle = async (obj) => {
 
         const textArea = await frame.childFrames()[1]
         await textArea.waitForSelector('.article-content')
-        await textArea.evaluate(() => document.querySelector('.article-content').innerText  = '前端已fix/done，待发包后，请测试。');
-        // await page.waitFor(1000)
-        // await page.click('#triggerModal')
-        // await frame.click('button[type=submit]')
+        await textArea.evaluate(() => document.querySelector('.article-content').innerText = '前端已fix/done，待发包后，请测试。 --Auto');
+        await page.waitFor(1000)
+        await page.click('#triggerModal')
+        await frame.click('button[type=submit]')
+        console.log('请求成功')
+
+        cacheData.forEach(item => {
+            if (item.id === obj.id)
+                item.content = '已解决'
+        })
+        store.set('chandao-BugStatus', cacheData)
+        gitDataDom.value = JSON.stringify(cacheData)
+        return 200
         // await page.waitFor(3000)
         // await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
     }

@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-09 09:08:00
+ * @LastEditTime: 2020-05-09 15:45:04
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -114,10 +114,9 @@
     } = require('./middlewares/qiniu')
     const qiniuImgDom = document.querySelector('#qiniuImg')
     const qiniuImgWrapDom = document.querySelector('#qiniuImg-wrap')
+    let cacheData = JSON.parse(document.querySelector('#gitData').value)
     document.querySelector('#generateTable').addEventListener('click', (e) => {
-      console.log(JSON.parse(document.querySelector('#gitData').value))
-      let data = JSON.parse(document.querySelector('#gitData').value)
-      setTable(data)
+      setTable(cacheData)
     })
     document.documentElement.addEventListener('keydown', event => {
       if (event.isComposing || event.keyCode === 27) {
@@ -215,7 +214,9 @@
               qiniuImgDom.src = getPicUrl(data.typeId)
             }
           } else if (obj.event === 'solved') {
-            onSolvedHandle(data)
+            const flag = onSolvedHandle(data)
+            if (flag === 200)
+              setTable(JSON.parse(document.querySelector('#gitData').value))
           }
         });
         let active = {
