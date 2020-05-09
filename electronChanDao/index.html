@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-09 15:45:04
+ * @LastEditTime: 2020-05-09 17:35:45
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -87,6 +87,9 @@
       </p>
       <p style="color:red">
         1. bugID2508其实对应的是bugID2666
+      </p>
+      <p style="color:red">
+        2. 2636已经合并进Master,因为某些原因，抓取禅道数据会失败
       </p>
     </div>
   </div>
@@ -214,9 +217,13 @@
               qiniuImgDom.src = getPicUrl(data.typeId)
             }
           } else if (obj.event === 'solved') {
-            const flag = onSolvedHandle(data)
-            if (flag === 200)
-              setTable(JSON.parse(document.querySelector('#gitData').value))
+            if (data.content === '激活') {
+              const flag = onSolvedHandle(data)
+              if (flag === 200)
+                setTable(JSON.parse(document.querySelector('#gitData').value))
+            } else {
+              layer.alert('此数据不能已解决')
+            }
           }
         });
         let active = {
