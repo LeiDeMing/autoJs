@@ -476,27 +476,35 @@ gitBranchBtn.addEventListener('change', async (event) => {
 
                 let cacheRow = null
                 for (let x = 0; x < cacheData.length; x++) {
-                    if (typeObj[cacheData[x]['typeId']]) {
+                    if (cacheData[x]['typeId'] === item) {
                         cacheRow = cacheData[x]
                         break;
                     }
                 }
-                if (cacheRow) {
-                    if (!cacheRow.qiniu) {
-                        await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                        formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
-                    } else {
-                        for (let x = 0; x < data.length; x++) {
-                            if (data[x]['typeId'] === cacheRow['typeId'] && data[x]['content'] !== typeObj[item]['content']) {
-                                await deleteData(item)
-                                formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
-                                break;
+                try {
+                    if (cacheRow) {
+                        if (!cacheRow.qiniu) {
+                            console.log(1,'qiniu create')
+                            await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                            formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                        } else {
+                            for (let x = 0; x < data.length; x++) {
+                                if (data[x]['typeId'] === cacheRow['typeId'] && cacheRow['content'] !== typeObj[item]['content']) {
+                                    console.log('qiniu update')
+                                    await deleteData(item)
+                                    await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                                    await formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                                    break;
+                                }
                             }
                         }
+                    } else {
+                        console.log(3,'qiniu create')
+                        await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                        formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                     }
-                }else{
-                    await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                    formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                } catch (e) {
+                    console.log('qiniu：', e)
                 }
                 await page.close()
             } catch (e) {
