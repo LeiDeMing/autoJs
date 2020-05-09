@@ -529,10 +529,10 @@ onSolvedHandle = async (obj) => {
     await page.goto(`${urlName}/bug-view-${/* obj.typeId */2775}.html`, { waitUntil: 'domcontentloaded' })
     await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
     let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
-    await page.waitForSelector('.btn-toolbar > a:nth-child(4)')
-    let solved = await page.$eval('.btn-toolbar > a:nth-child(4)', el => el.innerText);
+    await page.waitForSelector('.btn-toolbar > a:nth-last-child(6)')
+    let solved = await page.$eval('.btn-toolbar > a:nth-last-child(6)', el => el.innerText);
     if (solved === ' 解决' && pointContent.indexOf('凌明') > -1) {
-        await page.click('.btn-toolbar > a:nth-child(4)')
+        await page.click('.btn-toolbar > a:nth-last-child(6)')
         await page.waitFor(3000)
         const elementHandle = await page.$('#iframe-triggerModal');
         const frame = await elementHandle.contentFrame();
@@ -540,6 +540,12 @@ onSolvedHandle = async (obj) => {
         await frame.select('#resolution', 'fixed')
         await frame.waitForSelector('#resolvedBuild')
         await frame.select('#resolvedBuild', 'trunk')
+
+        const textArea = await frame.childFrames()[0]
+        // const textArea = await textAreaHandle.contentFrame();
+        await textArea.waitForSelector('.article-content')
+        const textAreaDom = await textArea.$eval('.article-content')
+        textAreaDom.innerHTML = '前端已fix/done，待发包后，请测试。'
         await frame.click('button[type=submit]')
         await frame.waitFor(3000)
         await page.screenshot({ path: `./utils/img/${/* obj.typeId */2775}.png`, fullPage: true });

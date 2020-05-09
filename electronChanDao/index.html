@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-08 16:32:55
+ * @LastEditTime: 2020-05-09 09:08:00
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -139,64 +139,64 @@
           id: 'idTest',
           cols: [
             [{
-                type: 'numbers'
-              }, {
-                type: 'checkbox'
-              }, {
-                field: 'committed_date',
-                title: 'committed_date',
-                sort: true
-              }, {
-                field: 'committer_name',
-                title: 'committer_name',
-                sort: true
-              }, {
-                field: 'message',
-                title: 'commit message',
-                sort: true
-              }, {
-                field: 'type',
-                title: 'type',
-                sort: true
-              }, {
-                field: 'typeId',
-                title: 'type_id',
-                sort: true
-              }, {
-                field: 'content',
-                title: 'Bug状态',
-                templet: function (d) {
-                  if (d.content === '已关闭') {
-                    return '<span style="color:red;">' + d.content + '</span>'
-                  }
-                  return d.content ? d.content : ''
-                },
-                sort: true
-              }, {
-                field: 'status',
-                title: '获取状态',
-                templet: function (d) {
-                  if (d.status === '成功') {
-                    return '<span style="color:red;">' + d.status + '</span>'
-                  }
-                  return d.status ? d.status : ''
-                },
-                sort: true
-              }, {
-                field: 'develop2Master',
-                title: 'develop2Master',
-                sort: true
-              }, {
-                field: '',
-                title: '操作',
-                toolbar: '#btn-develop2Master'
-              }
-              /* , {
-                            field: 'parent_ids',
-                            title: 'parent_ids',
-                            sort: true
-                          } */
-            ]
+              type: 'numbers'
+            }, {
+              type: 'checkbox'
+            }, {
+              field: 'committed_date',
+              title: 'committed_date',
+              sort: true
+            }, {
+              field: 'committer_name',
+              title: 'committer_name',
+              sort: true
+            }, {
+              field: 'message',
+              title: 'commit message',
+              sort: true
+            }, {
+              field: 'type',
+              title: 'type',
+              width: 80,
+              sort: true
+            }, {
+              field: 'typeId',
+              title: 'type_id',
+              width: 80,
+              sort: true
+            }, {
+              field: 'content',
+              title: 'Bug状态',
+              width: 100,
+              templet: function (d) {
+                if (d.content === '已关闭') {
+                  return '<span style="color:red;">' + d.content + '</span>'
+                }
+                return d.content ? d.content : ''
+              },
+              sort: true
+            }, {
+              field: 'status',
+              title: '获取状态',
+              width: 100,
+              templet: function (d) {
+                if (d.status === '成功') {
+                  return '<span style="color:red;">' + d.status + '</span>'
+                }
+                return d.status ? d.status : ''
+              },
+              sort: true
+            }, {
+              field: 'develop2Master',
+              title: '2Master',
+              sort: true,
+              width: 100,
+            }, {
+              field: '',
+              title: '操作',
+              toolbar: '#btn-develop2Master',
+              fixed: 'right'
+            }]
           ],
           data: data,
           limit: 999
