@@ -526,7 +526,7 @@ onSolvedHandle = async (obj) => {
     page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
     await page.waitFor(2000)
     await login(page)
-    await page.goto(`${urlName}/bug-view-${/* obj.typeId */2775}.html`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${urlName}/bug-view-${obj.typeId}.html`, { waitUntil: 'domcontentloaded' })
     await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
     let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
     await page.waitForSelector('.btn-toolbar > a:nth-last-child(6)')
@@ -541,14 +541,15 @@ onSolvedHandle = async (obj) => {
         await frame.waitForSelector('#resolvedBuild')
         await frame.select('#resolvedBuild', 'trunk')
 
-        const textArea = await frame.childFrames()[0]
+        const textArea = await frame.childFrames()[1]
         // const textArea = await textAreaHandle.contentFrame();
         await textArea.waitForSelector('.article-content')
-        const textAreaDom = await textArea.$eval('.article-content')
-        textAreaDom.innerHTML = '前端已fix/done，待发包后，请测试。'
+        await textArea.evaluate(() => document.querySelector('.article-content').innerText  = '前端已fix/done，待发包后，请测试。');
+        await page.waitFor(1000)
+        await page.click('#triggerModal')
         await frame.click('button[type=submit]')
-        await frame.waitFor(3000)
-        await page.screenshot({ path: `./utils/img/${/* obj.typeId */2775}.png`, fullPage: true });
+        await page.waitFor(3000)
+        await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
     }
 }
 module.exports = { main, cherryPick, onSolvedHandle }
