@@ -542,14 +542,13 @@ onSolvedHandle = async (obj) => {
         await frame.select('#resolvedBuild', 'trunk')
 
         const textArea = await frame.childFrames()[1]
-        // const textArea = await textAreaHandle.contentFrame();
         await textArea.waitForSelector('.article-content')
         await textArea.evaluate(() => document.querySelector('.article-content').innerText  = '前端已fix/done，待发包后，请测试。');
-        await page.waitFor(1000)
-        await page.click('#triggerModal')
-        await frame.click('button[type=submit]')
-        await page.waitFor(3000)
-        await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
+        // await page.waitFor(1000)
+        // await page.click('#triggerModal')
+        // await frame.click('button[type=submit]')
+        // await page.waitFor(3000)
+        // await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
     }
 }
 module.exports = { main, cherryPick, onSolvedHandle }
