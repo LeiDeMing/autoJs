@@ -39,9 +39,11 @@ async function getEarlyBirdNums() {
             console.log(buffer)
             await page.type('#otp', buffer)
             await page.waitFor(2000)
-            await page.click('.btn-block')
-            let btn = await page.$eval('.btn-block', el => el.innerHTML)
-            console.log(btn)
+            try {
+                await page.click('.btn-block')
+            } catch (e) {
+                console.log(e)
+            }
             await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
             await page.screenshot({ path: `./utils/img/${'ver'}.png`, fullPage: true });
         })
