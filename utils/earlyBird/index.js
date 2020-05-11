@@ -29,17 +29,19 @@ async function getEarlyBirdNums() {
     await page.click('input[type=submit]')
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
     console.log('github')
-    await page.waitFor(60000)
+    await page.waitFor(3000)
 
-    
-    fs.readFileSync(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
-        if (err) throw err;
-        console.log(buffer)
-        await page.type('#otp',buffer)
-        await page.click('button[type=submit]')
-        await page.waitFor(4000)
-        await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
-    })
+
+    setTimeout(() => {
+        fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
+            if (err) throw err;
+            console.log(buffer)
+            await page.type('#otp',buffer)
+            await page.click('button[type=submit]')
+            await page.waitFor(4000)
+            await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
+        })
+    }, 60000)
 
     // await page.waitForSelector('.btn-orange')
     // await page.click('.btn-orange')
