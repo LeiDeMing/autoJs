@@ -39,8 +39,8 @@ async function getEarlyBirdNums() {
             console.log(buffer)
             await page.type('#otp',buffer)
             await page.click('.btn-block')
-            await page.waitFor(10000)
-            await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
+            await page.waitForNavigation({ waitUntil: 'networkidle0' })
+            await page.screenshot({ path: `./utils/img/${'ver'}.png`, fullPage: true });
         })
     }, 60000)
 
