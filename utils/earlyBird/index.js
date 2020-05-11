@@ -29,11 +29,14 @@ async function getEarlyBirdNums() {
     await page.click('input[type=submit]')
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
     await page.waitFor(3000)
-    fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', function (err, buffer) {
-        if (err) throw err;
-        console.log(buffer)
+    // fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', function (err, buffer) {
+    //     if (err) throw err;
+    //     console.log(buffer)
+    // })
+    const _c = await page.content()
+    fs.writeFile(path.join(__dirname, 'pass.txt'), _c, function (err, buffer) {
+
     })
-    console.log(page.content())
     await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
 
     // await page.waitForSelector('.btn-orange')
