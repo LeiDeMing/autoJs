@@ -33,7 +33,7 @@ async function getEarlyBirdNums() {
         if (err) throw err;
         console.log(buffer)
     })
-    console.log(page.url())
+    console.log(page.content())
     await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
 
     // await page.waitForSelector('.btn-orange')
