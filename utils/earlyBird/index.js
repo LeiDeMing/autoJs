@@ -28,7 +28,7 @@ async function getEarlyBirdNums() {
     await page.type('#password', config.githubPass)
     await page.click('input[type=submit]')
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
-    console.log('github',config.githubName,config.githubPass)
+    console.log('github')
     await page.waitFor(3000)
     await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
 
