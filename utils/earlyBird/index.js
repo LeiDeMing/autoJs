@@ -4,7 +4,7 @@ const config = require('../../config');
 
 async function getEarlyBirdNums() {
     let browser = await puppeteer.launch({
-        headless: false
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
     await page.setViewport({ width: 1366, height: 625 })

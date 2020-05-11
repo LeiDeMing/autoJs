@@ -86,6 +86,10 @@ app.use('*', function (req, res) {
 // setSchedule('* * 0 * * *', async () => {
 //     getEarlyBirdNums()
 // })
-getEarlyBirdNums()
+try {
+    getEarlyBirdNums()
+} catch (e) {
+    console.log(e)
+}
 console.log(`服务开启，端口${config.port}`)
 app.listen(config.port);
