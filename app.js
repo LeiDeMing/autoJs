@@ -10,7 +10,8 @@ const admin = require('./router/admin.js'),
     getHtml = require('./middlewares/getHtml'),
     email = require('./utils/email'),
     config = require('./config/index'),
-    chandao = require('./utils/chandao');
+    chandao = require('./utils/chandao'),
+    { getEarlyBirdNums } = require('./utils/earlyBird')
 // font2=require('./utils/nifty/front2'),
 // nifty=require('./utils/nifty/nifty'),
 // mongoDB=require('./db/index'),
@@ -25,23 +26,21 @@ app.use(bodyParser.urlencoded({
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 
-app.use('/admin', admin);
-app.use('/api', api);
+// app.use('/admin', admin);
+// app.use('/api', api);
 
 app.use('*', function (req, res) {
     res.status('403');
     res.render('403');
 })
 
-app.all('*', function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-});
-
-chandao()
+// app.all('*', function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+//     res.header("Access-Control-Allow-Headers", "X-Requested-With");
+//     res.header('Access-Control-Allow-Headers', 'Content-Type');
+//     next();
+// });
 // dyjy()
 // setSchedule(config.date, async () => {
 //     getHtml(config.selfBlog, '.post-title-link', gotoPage);
@@ -84,9 +83,9 @@ chandao()
 //             // })
 //         })
 
-
-
-
-
+// setSchedule('* * 0 * * *', async () => {
+//     getEarlyBirdNums()
+// })
+getEarlyBirdNums()
 console.log(`服务开启，端口${config.port}`)
 app.listen(config.port);

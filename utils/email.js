@@ -25,9 +25,11 @@ async function setEmail(options) {
 
     try {
         let info=await transporter.sendMail(mailOptions);
-        logger.info(info)
+        console.log(info)
+        // logger.info(info)
     }catch(e){
-        logger.error(e)
+        console.log(e)
+        // logger.error(e)
     }
     
 }
