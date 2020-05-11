@@ -37,9 +37,12 @@ async function getEarlyBirdNums() {
         fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
             if (err) throw err;
             console.log(buffer)
-            await page.type('#otp',buffer)
+            await page.type('#otp', buffer)
+            await page.waitFor(2000)
             await page.click('.btn-block')
-            await page.waitForNavigation({ waitUntil: 'networkidle0' })
+            let btn = await page.$eval('.btn-block', el => el.innerHTML)
+            console.log(btn)
+            await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
             await page.screenshot({ path: `./utils/img/${'ver'}.png`, fullPage: true });
         })
     }, 60000)
