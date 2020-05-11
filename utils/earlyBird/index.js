@@ -30,6 +30,7 @@ async function getEarlyBirdNums() {
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
     console.log('github')
     await page.waitFor(3000)
+    await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
 
 
     setTimeout(() => {
