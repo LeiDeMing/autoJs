@@ -38,11 +38,11 @@ async function getEarlyBirdNums() {
             if (err) throw err;
             console.log(buffer)
             await page.type('#otp',buffer)
-            await page.click('button[type=submit]')
-            await page.waitFor(4000)
+            await page.click('.btn-block')
+            await page.waitFor(10000)
             await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
         })
-    }, 100000)
+    }, 60000)
 
     // await page.waitForSelector('.btn-orange')
     // await page.click('.btn-orange')
