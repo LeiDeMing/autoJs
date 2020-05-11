@@ -32,7 +32,7 @@ async function getEarlyBirdNums() {
     await page.waitFor(60000)
 
     
-    fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
+    fs.readFileSync(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
         if (err) throw err;
         console.log(buffer)
         await page.type('#otp',buffer)
