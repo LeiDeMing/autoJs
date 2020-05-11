@@ -4,7 +4,7 @@ const config = require('../../config');
 
 async function getEarlyBirdNums() {
     let browser = await puppeteer.launch({
-        headless: false
+        args: ['--no-sandbox']
     });
     const page = await browser.newPage();
     await page.setViewport({ width: 1366, height: 625 })
@@ -26,7 +26,7 @@ async function getEarlyBirdNums() {
     await page.type('#password', config.githubPass)
     // await page.click('input[type=submit]')
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
-
+    await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
     // await page.waitForSelector('.btn-orange')
     // await page.click('.btn-orange')
     // await page.waitForResponse('https://earlybirdcamp.sorrycc.com/api/github/memberStatus')
