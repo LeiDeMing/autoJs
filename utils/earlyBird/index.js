@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 const email = require('../email');
 const config = require('../../config');
 
@@ -27,7 +29,13 @@ async function getEarlyBirdNums() {
     await page.click('input[type=submit]')
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
     await page.waitFor(3000)
+    fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', function (err, buffer) {
+        if (err) throw err;
+        console.log(buffer)
+    })
+    console.log(page.url())
     await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
+
     // await page.waitForSelector('.btn-orange')
     // await page.click('.btn-orange')
     // await page.waitForResponse('https://earlybirdcamp.sorrycc.com/api/github/memberStatus')
