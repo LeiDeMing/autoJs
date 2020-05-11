@@ -28,16 +28,18 @@ async function getEarlyBirdNums() {
     await page.type('#password', config.githubPass)
     await page.click('input[type=submit]')
     // await page.waitForNavigation({ waitUntil: 'networkidle0' })
-    await page.waitFor(3000)
-    // fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', function (err, buffer) {
-    //     if (err) throw err;
-    //     console.log(buffer)
-    // })
-    const _c = await page.content()
-    fs.writeFile(path.join(__dirname, 'pass.txt'), _c, function (err, buffer) {
+    console.log('github')
+    await page.waitFor(60000)
 
+    
+    fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
+        if (err) throw err;
+        console.log(buffer)
+        await page.type('#otp',buffer)
+        await page.click('button[type=submit]')
+        await page.waitFor(4000)
+        await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
     })
-    await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
 
     // await page.waitForSelector('.btn-orange')
     // await page.click('.btn-orange')
