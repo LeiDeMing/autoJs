@@ -170,7 +170,6 @@ const scheduleBtn = document.querySelector('#getBug')
 const gitBranchBtn = document.querySelector('#gitBranch')
 const dateStartInput = document.querySelector('#dateStart')
 const dateEndInput = document.querySelector('#dateEnd')
-const gitDataDom = document.querySelector('#gitData')
 const exportExcelDom = document.querySelector('#exportExcel')
 const btnCloseDom = document.querySelector('#btn-close')
 const viewDoneBugDom = document.querySelector('#view-done-bug')
@@ -261,9 +260,6 @@ btnCloseDom.addEventListener('click', async (e) => {
     }))
 })
 
-if (store.get('chandao-BugStatus')) {
-    gitDataDom.value = JSON.stringify(store.get('chandao-BugStatus'))
-}
 
 scheduleBtn.addEventListener('click', async () => {
     let rule = new schedule.RecurrenceRule();
@@ -528,7 +524,6 @@ gitBranchBtn.addEventListener('change', async (event) => {
                     }
                 })
                 store.set('chandao-BugStatus', data)
-                gitDataDom.value = JSON.stringify(data)
                 // await browser.close();
                 console.log(data, typeObj)
             }
@@ -555,7 +550,7 @@ cherryPick = async (typeId) => {
     await page.screenshot({ path: `./utils/img/login.png`, fullPage: true });
 }
 
-onSolvedHandle = async (obj) => {
+onSolvedHandle = async (obj,callback) => {
     const { browser } = await createPage('', false)
     let page = await browser.newPage()
     let cacheData = store.get('chandao-BugStatus')
@@ -593,10 +588,9 @@ onSolvedHandle = async (obj) => {
         await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
         await formUploader(obj.typeId, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${obj.typeId}.png`)
         store.set('chandao-BugStatus', cacheData)
-        gitDataDom.value = JSON.stringify(cacheData)
-        return 200
+        callback && callback(cacheData)
         // await page.waitFor(3000)
         // await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
     }
 }
-module.exports = { main, cherryPick, onSolvedHandle }
+module.exports = { main, cherryPick, onSolvedHandle, store }

@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-09 17:35:45
+ * @LastEditTime: 2020-05-12 15:18:54
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -110,14 +110,15 @@
   <script>
     const {
       cherryPick,
-      onSolvedHandle
+      onSolvedHandle,
+      store
     } = require('./renderer')
     const {
       getPicUrl
     } = require('./middlewares/qiniu')
     const qiniuImgDom = document.querySelector('#qiniuImg')
     const qiniuImgWrapDom = document.querySelector('#qiniuImg-wrap')
-    let cacheData = JSON.parse(document.querySelector('#gitData').value)
+    let cacheData = store.get('chandao-BugStatus')
     document.querySelector('#generateTable').addEventListener('click', (e) => {
       setTable(cacheData)
     })
@@ -218,9 +219,9 @@
             }
           } else if (obj.event === 'solved') {
             if (data.content === '激活') {
-              const flag = onSolvedHandle(data)
-              if (flag === 200)
-                setTable(JSON.parse(document.querySelector('#gitData').value))
+              onSolvedHandle(data, newData => {
+                setTable(newData)
+              })
             } else {
               layer.alert('此数据不能已解决')
             }
