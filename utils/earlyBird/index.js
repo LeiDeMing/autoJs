@@ -33,21 +33,23 @@ async function getEarlyBirdNums() {
     await page.screenshot({ path: `./utils/img/${'earlybirdcamp'}.png`, fullPage: true });
 
 
-    setTimeout(() => {
-        fs.readFile(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
+    try {
+        fs.readFileSync(path.join(__dirname, 'pass.txt'), 'utf-8', async (err, buffer) => {
             if (err) throw err;
             console.log(buffer)
-            await page.type('#otp', buffer)
-            await page.waitFor(2000)
-            try {
-                await page.click('.btn-block')
-            } catch (e) {
-                console.log(e)
-            }
-            await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+            // await page.type('#otp', buffer)
+            // await page.waitFor(2000)
+            // try {
+            //     await page.click('.btn-block')
+            // } catch (e) {
+            //     console.log(e)
+            // }
+            // await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
             await page.screenshot({ path: `./utils/img/${'ver'}.png`, fullPage: true });
         })
-    }, 60000)
+    } catch (e) {
+        console.log(e)
+    }
 
     // await page.waitForSelector('.btn-orange')
     // await page.click('.btn-orange')
