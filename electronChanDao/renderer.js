@@ -384,7 +384,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
     }
 
     async function getMasterData(page = 1) {
-        await fetch(_urlMaster, httpConfig).then(res => {
+        await fetch(`${_urlMaster}&page=${page}`, httpConfig).then(res => {
             return res.json()
         }).then(async master => {
             if (master.length >= 100) {
@@ -456,17 +456,20 @@ gitBranchBtn.addEventListener('change', async (event) => {
                 await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
                 await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
                 await page.waitForSelector('.page-title > span:nth-child(2)')
+                await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(6)>td>span')
                 let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
                 let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
                 let content = await page.$eval('.status-bug', el => el.innerText);
                 let title = await page.$eval('.page-title > span:nth-child(2)', el => el.innerText)
+                let rank = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(6)>td>span', el => el.innerText)
                 typeObj[item] = {
                     content,
                     status: '成功',
                     point: pointContent,
                     fixUser: fixContent,
                     title,
-                    qiniu: true
+                    qiniu: true,
+                    rank
                 }
                 // const isHave = await getDataMsg(item)
 
@@ -521,6 +524,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
                         item.fixUser = typeObj[item.typeId]['fixUser']
                         item.title = typeObj[item.typeId]['title']
                         item.qiniu = typeObj[item.typeId]['qiniu']
+                        item.type += '--' + typeObj[item.typeId]['rank']
                     }
                 })
                 store.set('chandao-BugStatus', data)
@@ -550,7 +554,7 @@ cherryPick = async (typeId) => {
     await page.screenshot({ path: `./utils/img/login.png`, fullPage: true });
 }
 
-onSolvedHandle = async (obj,callback) => {
+onSolvedHandle = async (obj, callback) => {
     const { browser } = await createPage('', false)
     let page = await browser.newPage()
     let cacheData = store.get('chandao-BugStatus')

@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-12 15:18:54
+ * @LastEditTime: 2020-05-13 11:11:36
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -118,9 +118,8 @@
     } = require('./middlewares/qiniu')
     const qiniuImgDom = document.querySelector('#qiniuImg')
     const qiniuImgWrapDom = document.querySelector('#qiniuImg-wrap')
-    let cacheData = store.get('chandao-BugStatus')
     document.querySelector('#generateTable').addEventListener('click', (e) => {
-      setTable(cacheData)
+      setTable(store.get('chandao-BugStatus'))
     })
     document.documentElement.addEventListener('keydown', event => {
       if (event.isComposing || event.keyCode === 27) {
@@ -151,7 +150,8 @@
               sort: true
             }, {
               field: 'committer_name',
-              title: 'committer_name',
+              title: 'name',
+              width: 120,
               sort: true
             }, {
               field: 'message',
