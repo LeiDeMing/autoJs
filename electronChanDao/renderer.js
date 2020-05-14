@@ -167,8 +167,6 @@ async function main() {
 }
 
 const scheduleBtn = document.querySelector('#getBug')
-const gitBranchBtn = document.querySelector('#gitBranch')
-const dateStartInput = document.querySelector('#dateStart')
 const dateEndInput = document.querySelector('#dateEnd')
 const exportExcelDom = document.querySelector('#exportExcel')
 const btnCloseDom = document.querySelector('#btn-close')
@@ -344,17 +342,21 @@ viewCloseBugDom.addEventListener('click', (e) => {
     XLSX.writeFile(new_workbook, `D:\\chrome download\\json_to_excel-${(new Date()).toLocaleDateString('ko-KR')}.xlsx`);
 })
 
-dateStartInput.addEventListener('change', (event) => {
-    dateObj.startTime = event.target.value
-})
-
 dateEndInput.addEventListener('change', (event) => {
     dateObj.endTime = event.target.value
 })
 
-gitBranchBtn.addEventListener('change', async (event) => {
+setEndTime = async (value) => {
+    dateObj.endTime = value
+}
+
+setStartTime = async (value) => {
+    dateObj.startTime = value
+}
+
+getBranchMsg = async (value) => {
     let cacheData = store.get('chandao-BugStatus')
-    let gitBranchValue = event.target.value || 'develop'
+    let gitBranchValue = value || 'develop'
     let _url = _urlFun(gitBranchValue)
     let _urlMaster = _urlFun('master')
 
@@ -489,10 +491,10 @@ gitBranchBtn.addEventListener('change', async (event) => {
                         } else {
                             for (let x = 0; x < data.length; x++) {
                                 if (data[x]['typeId'] === cacheRow['typeId'] && cacheRow['content'] !== typeObj[item]['content']) {
-                                    console.log('qiniu update')
                                     await deleteData(item)
                                     await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
                                     await formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                                    console.log('qiniu update')
                                     break;
                                 }
                             }
@@ -535,7 +537,7 @@ gitBranchBtn.addEventListener('change', async (event) => {
         }))
         // })
     }
-})
+}
 
 cherryPick = async (typeId) => {
     const { browser } = await createPage('', false)
@@ -554,7 +556,10 @@ cherryPick = async (typeId) => {
     await page.screenshot({ path: `./utils/img/login.png`, fullPage: true });
 }
 
-onSolvedHandle = async (obj, callback) => {
+onSolvedHandle = async (layer, obj, callback) => {
+    const layerIndex = layer.open({
+        content: '正在操作，请稍等'
+    });
     const { browser } = await createPage('', false)
     let page = await browser.newPage()
     let cacheData = store.get('chandao-BugStatus')
@@ -592,9 +597,19 @@ onSolvedHandle = async (obj, callback) => {
         await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
         await formUploader(obj.typeId, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${obj.typeId}.png`)
         store.set('chandao-BugStatus', cacheData)
+
+        layer.close(layerIndex)
         callback && callback(cacheData)
         // await page.waitFor(3000)
         // await page.screenshot({ path: `./utils/img/${obj.typeId}.png`, fullPage: true });
     }
 }
-module.exports = { main, cherryPick, onSolvedHandle, store }
+module.exports = {
+    main,
+    cherryPick,
+    onSolvedHandle,
+    store,
+    getBranchMsg,
+    setEndTime,
+    setStartTime
+}

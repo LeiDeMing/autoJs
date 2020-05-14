@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-13 11:11:36
+ * @LastEditTime: 2020-05-14 14:33:17
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -43,28 +43,30 @@
     </div>
     <div>
       <h4 style="color: skyblue;">4月16号开始不同分支开发</h4>
-      <h3>禅道BUG状态</h3>
-      <label for="dateStart">
-        开始时间:
-        <input type="date" name="dateStart" id="dateStart">
-      </label>
-      </br>
-      <label for="dateEnd">
-        结束时间:
-        <input type="date" name="dateEnd" id="dateEnd">
-      </label>
-      </br>
-      <label for="gitBranch">
-        选择分支
-        <select name="gitBranch" id="gitBranch" title="默认选择develop分支">
-          <option value="develop">--</option>
-          <option value="develop">develop</option>
-          <!-- <option value="feature">feature</option>
-          <option value="hotfix">hotfix</option>
-          <option value="master">master</option>
-          <option value="release">release</option> -->
-        </select>
-      </label>
+      <form class="layui-form" id="layui-form">
+        <div class="layui-input-inline">
+          Start：<input type="text" name="dateStart" id="dateStart" lay-verify="dateStart" placeholder="yyyy-MM-dd"
+            autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          End：<input type="text" name="dateEnd" id="dateEnd" lay-verify="dateEnd" placeholder="yyyy-MM-dd"
+            autocomplete="off" class="layui-input">
+        </div>
+        <br>
+        <div class="layui-input-inline" style="margin-top: 10px;">
+          <select name="gitBranch" lay-filter="gitBranch" lay-verify="">
+            <option value="">请选择一个分支</option>
+            <option value="develop">develop</option>
+          </select>
+        </div>
+        <div class="layui-input-inline" style="margin-top: 10px;">
+          <select name="filterData" lay-filter="filterData" lay-verify="">
+            <option value="">过滤数据</option>
+            <option value="1">已合并进Master</option>
+            <option value="0">未合并进Master</option>
+          </select>
+        </div>
+      </form>
       总数：<span id="gitBranch-all">0</span>
       ---
       已请求：<span id="gitBranch-requested">0</span>
@@ -105,19 +107,27 @@
   <script type="text/html" id="btn-develop2Master">
     <a class="layui-btn layui-btn-xs" lay-event="solved" title="已解决">已解决</a>
     <a class="layui-btn layui-btn-xs" lay-event="preview" title="预览">预览</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cherry-pick" title="Develop To Master">cherry-pick</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="cherry-pick" title="Develop To Master">c-pick</a>
+    <a class="layui-btn layui-btn-xs" lay-event="qiniuUpdate" title="更新七牛云图片">U</a>
   </script>
   <script>
     const {
       cherryPick,
       onSolvedHandle,
-      store
+      store,
+      getBranchMsg,
+      setStartTime,
+      setEndTime
     } = require('./renderer')
     const {
       getPicUrl
     } = require('./middlewares/qiniu')
     const qiniuImgDom = document.querySelector('#qiniuImg')
     const qiniuImgWrapDom = document.querySelector('#qiniuImg-wrap')
+    document.querySelector('#layui-form').addEventListener('click', (e) => {
+      e.stopPropagation()
+      e.preventDefault()
+    })
     document.querySelector('#generateTable').addEventListener('click', (e) => {
       setTable(store.get('chandao-BugStatus'))
     })
@@ -127,6 +137,48 @@
       }
       // do something
     })
+
+    layui.use('laydate', function () {
+      var laydate = layui.laydate;
+      laydate.render({
+        elem: '#dateStart',
+        done: function (value, date, endDate) {
+          if (value)
+            setStartTime(value)
+        }
+      });
+      laydate.render({
+        elem: '#dateEnd',
+        done: function (value, date, endDate) {
+          if (value)
+            setEndTime(value)
+        }
+      });
+    });
+
+    layui.use('form', function () {
+      var form = layui.form;
+      form.on('select(gitBranch)', function (data) {
+        if (data.value) {
+          getBranchMsg(data.value)
+        }
+      });
+      form.on('select(filterData)', function (data) {
+        let notD2M = []
+        let d2M = []
+        if (data.value) {
+          store.get('chandao-BugStatus').forEach(item => {
+            if (!item.develop2Master) {
+              notD2M.push(item)
+            } else {
+              d2M.push(item)
+            }
+          })
+          setTable(data.value === '0' ? notD2M : d2M)
+        }
+      });
+    });
+
     // cherryPick()
     function setTable(data) {
       layui.use('table', function () {
@@ -219,7 +271,7 @@
             }
           } else if (obj.event === 'solved') {
             if (data.content === '激活') {
-              onSolvedHandle(data, newData => {
+              onSolvedHandle(layer, data, newData => {
                 setTable(newData)
               })
             } else {
