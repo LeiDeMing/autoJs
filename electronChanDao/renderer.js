@@ -7,7 +7,7 @@ const schedule = require('node-schedule');
 const XLSX = require('xlsx');
 const moment = require('moment')
 require('events').EventEmitter.defaultMaxListeners = 100
-const { setSchedule } = require('./utils')
+const { setSchedule, deleteImg } = require('./utils')
 const { formUploader, getDataMsg, deleteData } = require('./middlewares/qiniu')
 const { ChanDaoUrl: urlName, chanDaoName, chanDaoPass, gitlabAccessToken, gitlabUrl, gitLabName, gitLabPass } = require('./config')
 
@@ -174,6 +174,7 @@ const viewDoneBugDom = document.querySelector('#view-done-bug')
 const viewCloseBugDom = document.querySelector('#view-close-bug')
 const gitBranchAllDom = document.querySelector('#gitBranch-all')
 const gitBranchRequestedDom = document.querySelector('#gitBranch-requested')
+const removeDataDom = document.querySelector('#removeData')
 let dateObj = {
     startTime: '2020-04-16',
     endTime: '2020-05-08'
@@ -191,6 +192,11 @@ const httpConfig = {
         // 'X-Per-Page':99999
     }
 }
+
+removeDataDom.addEventListener('click', e => {
+    store.set('chandao-BugStatus',null)
+})
+
 btnCloseDom.addEventListener('click', async (e) => {
     let bugObj = {}
     let yestertoday = moment(new Date()).add(-1, 'days').format("YYYY-MM-DD") //后期改用时间库
@@ -279,6 +285,10 @@ exportExcelDom.addEventListener('click', (e) => {
     if (!_d || !_d.length) return
     let head = Object.keys(_d[0])
     data.push(head)
+    if (!_d) {
+        window.alert('缓存数据为NULL')
+        return
+    }
     _d.forEach(item => {
         let arr = []
         head.forEach(col => {
@@ -298,6 +308,10 @@ viewDoneBugDom.addEventListener('click', (e) => {
     let _d = store.get('chandao-BugStatus')
     let data = []
     let head = ['content', 'typeId', 'point', 'fixUser']
+    if (!_d) {
+        window.alert('缓存数据为NULL')
+        return
+    }
     data.push(head)
     _d.forEach(item => {
         if (item.content === '已解决') {
@@ -321,6 +335,10 @@ viewCloseBugDom.addEventListener('click', (e) => {
     let head = ['typeId', 'title', 'committer_name']
     const pureArr = []
     data.push(head)
+    if (!_d) {
+        window.alert('缓存数据为NULL')
+        return
+    }
     _d.forEach(item => {
         if (item.content === '已关闭' && !item.develop2Master) {
             if (!pureArr.includes(item.typeId)) {
@@ -470,16 +488,17 @@ getBranchMsg = async (value) => {
                     point: pointContent,
                     fixUser: fixContent,
                     title,
-                    qiniu: true,
                     rank
                 }
                 // const isHave = await getDataMsg(item)
 
                 let cacheRow = null
-                for (let x = 0; x < cacheData.length; x++) {
-                    if (cacheData[x]['typeId'] === item) {
-                        cacheRow = cacheData[x]
-                        break;
+                if(cacheData){
+                    for (let x = 0; x < cacheData.length; x++) {
+                        if (cacheData[x]['typeId'] === item) {
+                            cacheRow = cacheData[x]
+                            break;
+                        }
                     }
                 }
                 try {
@@ -493,7 +512,7 @@ getBranchMsg = async (value) => {
                                 if (data[x]['typeId'] === cacheRow['typeId'] && cacheRow['content'] !== typeObj[item]['content']) {
                                     await deleteData(item)
                                     await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                                    await formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                                    formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                                     console.log('qiniu update')
                                     break;
                                 }
@@ -504,6 +523,7 @@ getBranchMsg = async (value) => {
                         await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
                         formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                     }
+                    typeObj[item]['qiniu'] = true
                 } catch (e) {
                     console.log('qiniu：', e)
                 }
@@ -518,6 +538,7 @@ getBranchMsg = async (value) => {
             console.log(typeIdArr.length, Object.keys(typeObj).length)
             gitBranchRequestedDom.innerHTML = Object.keys(typeObj).length
             if (typeIdArr.length === Object.keys(typeObj).length) {
+                deleteImg('D:\\github\\autoJs\\electronChanDao\\utils\\img')
                 data.forEach(item => {
                     if (typeObj[item.typeId]) {
                         item.content = typeObj[item.typeId]['content']
@@ -557,12 +578,17 @@ cherryPick = async (typeId) => {
 }
 
 onSolvedHandle = async (layer, obj, callback) => {
+    let cacheData = store.get('chandao-BugStatus')
+    if (!cacheData) {
+        window.alert('缓存数据为NULL')
+        return
+    }
     const layerIndex = layer.open({
         content: '正在操作，请稍等'
     });
     const { browser } = await createPage('', false)
     let page = await browser.newPage()
-    let cacheData = store.get('chandao-BugStatus')
+
     page.goto(`${urlName}/user-login.html`, { waitUntil: 'domcontentloaded' })
     await page.waitFor(2000)
     await login(page)

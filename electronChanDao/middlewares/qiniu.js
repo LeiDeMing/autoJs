@@ -22,9 +22,9 @@ function getPicUrl(key) {
     return privateDownloadUrl
 }
 
-async function formUploader(key, localFile) {
+async function formUploader(key, readableStream) {
     return new Promise((resolve, reject) => {
-        formUploaderCore.putFile(uploadToken, key, localFile, putExtra, function (respErr,
+        formUploaderCore.putFile(uploadToken, key, readableStream, putExtra, function (respErr,
             respBody, respInfo) {
             if (respErr) {
                 reject(respErr);

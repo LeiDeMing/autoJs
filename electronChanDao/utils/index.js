@@ -1,4 +1,5 @@
 const schedule = require('node-schedule');
+const fs = require('fs')
 
 
 function setSchedule(date, callback) {
@@ -14,6 +15,23 @@ function setSchedule(date, callback) {
     schedule.scheduleJob(date, callback);
 }
 
+function deleteImg(path) {
+    var files = [];
+    if (fs.existsSync(path)) {
+        files = fs.readdirSync(path);
+        files.forEach(function (file, index) {
+            var curPath = path + "/" + file;
+            if (fs.statSync(curPath).isDirectory()) { // recurse
+                deleteall(curPath);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
+        });
+        // fs.rmdirSync(path);
+    }
+}
+
 module.exports = {
-    setSchedule
+    setSchedule,
+    deleteImg
 }
