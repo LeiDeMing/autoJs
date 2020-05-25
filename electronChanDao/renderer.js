@@ -194,7 +194,7 @@ const httpConfig = {
 }
 
 removeDataDom.addEventListener('click', e => {
-    store.set('chandao-BugStatus',null)
+    store.set('chandao-BugStatus', null)
 })
 
 btnCloseDom.addEventListener('click', async (e) => {
@@ -307,7 +307,7 @@ viewDoneBugDom.addEventListener('click', (e) => {
     console.log(store.get('chandao-BugStatus'))
     let _d = store.get('chandao-BugStatus')
     let data = []
-    let head = ['content', 'typeId', 'point', 'fixUser']
+    let head = ['content', 'title', 'typeId', 'point', 'fixUser']
     if (!_d) {
         window.alert('缓存数据为NULL')
         return
@@ -376,7 +376,7 @@ getBranchMsg = async (value) => {
     let cacheData = store.get('chandao-BugStatus')
     let gitBranchValue = value || 'develop'
     let _url = _urlFun(gitBranchValue)
-    let _urlMaster = _urlFun('master')
+    let _urlMaster = _urlFun('production')
 
     if (dateObj.startTime) {
         _url += `&since=${dateObj.startTime}`
@@ -416,18 +416,34 @@ getBranchMsg = async (value) => {
         })
     }
 
+    function getTypeId(item) {
+        let commitMsgF = item.title.split('&')
+        if (commitMsgF[1]) {
+            return parseInt(commitMsgF[1])
+        }
+    }
+
     await getDevelopData()
     await getMasterData()
     console.log(data, master_data)
 
-    data.forEach(d => {
-        master_data.forEach(m => {
-            if (d.message === m.message) {
-                d.develop2Master = true
-            }
-        })
+    let develop2MasterObj = {}
+    master_data.reverse().forEach(m => {
+        let typeIdM = parseInt(getTypeId(m))
+        let value = null
+        if(m.title.indexOf('Revert') === -1){
+            value = true
+        }
+        develop2MasterObj[typeIdM] = value
     })
-    data.forEach(item => {
+    console.log(develop2MasterObj)
+    data.reverse().forEach(d => {
+        let typeIdD = parseInt(getTypeId(d))
+        if(develop2MasterObj[typeIdD]){
+            d.develop2Master = develop2MasterObj[typeIdD]
+        }
+    })
+    data.reverse().forEach(item => {
         if (item.message.indexOf('Merge branch') > -1) {
             item.type = 'Merge branch'
             item.typeId = 'Merge branch'
@@ -493,7 +509,7 @@ getBranchMsg = async (value) => {
                 // const isHave = await getDataMsg(item)
 
                 let cacheRow = null
-                if(cacheData){
+                if (cacheData) {
                     for (let x = 0; x < cacheData.length; x++) {
                         if (cacheData[x]['typeId'] === item) {
                             cacheRow = cacheData[x]
@@ -545,7 +561,7 @@ getBranchMsg = async (value) => {
                         item.status = typeObj[item.typeId]['status']
                         item.point = typeObj[item.typeId]['point']
                         item.fixUser = typeObj[item.typeId]['fixUser']
-                        item.title = typeObj[item.typeId]['title']
+                        item.titleSelf = typeObj[item.typeId]['title']
                         item.qiniu = typeObj[item.typeId]['qiniu']
                         item.type += '--' + typeObj[item.typeId]['rank']
                     }

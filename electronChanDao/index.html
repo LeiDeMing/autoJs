@@ -2,7 +2,7 @@
  * @Author: NeiDeMing
  * @Date: 2020-04-17 15:56:57
  * @LastEditors: NeiDeMing
- * @LastEditTime: 2020-05-21 16:04:24
+ * @LastEditTime: 2020-05-25 14:25:52
  * @FilePath: \autoJs\electronChanDao\index.html
  -->
 <!DOCTYPE html>
@@ -43,6 +43,7 @@
     </div>
     <div>
       <h4 style="color: skyblue;">4月16号开始不同分支开发</h4>
+      <h4 style="color: skyblue;">2020/05/21 及 之前所有commit已经合进production分支</h4>
       <form class="layui-form" id="layui-form">
         <div class="layui-input-inline">
           Start：<input type="text" name="dateStart" id="dateStart" lay-verify="dateStart" placeholder="yyyy-MM-dd"
@@ -87,16 +88,6 @@
         <button class="layui-btn" id="view-done-bug">导出已解决Bug</button>
         <button class="layui-btn" id="view-close-bug">导出已关闭Bug</button>
         <button class="layui-btn" id="removeData">清空缓存</button>
-      </p>
-      <p style="color:red">
-        1. bugID2508其实对应的是bugID2666
-      </p>
-      <p style="color:red">
-        2. 2636已经合并进Master,因为某些原因，抓取禅道数据会失败
-      </p>
-      <p style="color:red">
-        3. 2847有一个前置依赖（2666）
-        4. 2837有个一个前置依赖（2595）
       </p>
     </div>
   </div>
