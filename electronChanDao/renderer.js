@@ -436,9 +436,9 @@ getBranchMsg = async (value) => {
         }
         develop2MasterObj[typeIdM] = value
     })
-    console.log(develop2MasterObj)
     data.reverse().forEach(d => {
         let typeIdD = parseInt(getTypeId(d))
+        d.develop2Master = ''
         if(develop2MasterObj[typeIdD]){
             d.develop2Master = develop2MasterObj[typeIdD]
         }
