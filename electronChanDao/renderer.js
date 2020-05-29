@@ -269,11 +269,22 @@ scheduleBtn.addEventListener('click', async () => {
     let rule = new schedule.RecurrenceRule();
     let _d = new Date()
     // rule.minute = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
-    rule.minute = [0, 15, 30, 45];
+    // rule.minute = [0, 15, 30, 45];
+    rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
     scheduleBtn.setAttribute('disabled', 'true')
-    setSchedule(rule, async () => {
+    try{
         console.log('定时任务启动 --- ' + _d)
         await main()
+    }catch(e){
+        console.log('数量为 0 ！！！！！！！')
+    }
+    setSchedule(rule, async () => {
+        console.log('定时任务启动 --- ' + _d)
+        try {
+            await main()
+        } catch (e) {
+            console.log('数量为 0 ！！！！！！！')
+        }
     })
     // await main()
 })
@@ -383,7 +394,7 @@ getBranchMsg = async (value) => {
         _urlMaster += `&since=${dateObj.startTime}`
     } if (dateObj.endTime) {
         _url += `&until=${dateObj.endTime}`
-        _urlMaster += `&until=${moment(new Date()).format("YYYY-MM-DD")}`
+        _urlMaster += `&until=${moment(new Date()).add(1, 'days').format("YYYY-MM-DD")}`
     }
     let data = []
     let master_data = []
@@ -431,7 +442,7 @@ getBranchMsg = async (value) => {
     master_data.reverse().forEach(m => {
         let typeIdM = parseInt(getTypeId(m))
         let value = null
-        if(m.title.indexOf('Revert') === -1){
+        if (m.title.indexOf('Revert') === -1) {
             value = true
         }
         develop2MasterObj[typeIdM] = value
@@ -439,7 +450,7 @@ getBranchMsg = async (value) => {
     data.reverse().forEach(d => {
         let typeIdD = parseInt(getTypeId(d))
         d.develop2Master = ''
-        if(develop2MasterObj[typeIdD]){
+        if (develop2MasterObj[typeIdD]) {
             d.develop2Master = develop2MasterObj[typeIdD]
         }
     })
