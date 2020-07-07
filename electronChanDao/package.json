@@ -20,7 +20,7 @@
   ],
   "author": "GitHub",
   "devDependencies": {
-    "electron": "^6.1.10"
+    "electron": "^7.2.4"
   },
   "dependencies": {
     "electron-store": "^5.1.1",
