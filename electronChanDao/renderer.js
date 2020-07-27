@@ -445,13 +445,13 @@ getBranchMsg = async (value) => {
         if (m.title.indexOf('Revert') === -1) {
             value = true
         }
-        develop2MasterObj[typeIdM] = value
+        develop2MasterObj[m.title] = value
     })
     data.reverse().forEach(d => {
         let typeIdD = parseInt(getTypeId(d))
         d.develop2Master = ''
-        if (develop2MasterObj[typeIdD]) {
-            d.develop2Master = develop2MasterObj[typeIdD]
+        if (develop2MasterObj[d.title]) {
+            d.develop2Master = develop2MasterObj[d.title]
         }
     })
     data.reverse().forEach(item => {
@@ -502,9 +502,11 @@ getBranchMsg = async (value) => {
                 await page.waitForSelector('.status-bug')
                 await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(11)>td')
                 await page.waitForSelector('#legendLife table>tbody>tr:nth-child(3)>td')
+                await page.waitForSelector('#legendLife table>tbody>tr:nth-child(2)>td')
                 await page.waitForSelector('.page-title > span:nth-child(2)')
                 await page.waitForSelector('#legendBasicInfo table>tbody>tr:nth-child(6)>td>span')
                 let fixContent = await page.$eval('#legendLife table>tbody>tr:nth-child(3)>td', el => el.innerText);
+                let bugBranch = await page.$eval('#legendLife table>tbody>tr:nth-child(2)>td', el => el.innerText);
                 let pointContent = await page.$eval('#legendBasicInfo table>tbody>tr:nth-child(11)>td', el => el.innerText);
                 let content = await page.$eval('.status-bug', el => el.innerText);
                 let title = await page.$eval('.page-title > span:nth-child(2)', el => el.innerText)
@@ -515,7 +517,8 @@ getBranchMsg = async (value) => {
                     point: pointContent,
                     fixUser: fixContent,
                     title,
-                    rank
+                    rank,
+                    bugBranch
                 }
                 // const isHave = await getDataMsg(item)
 
@@ -532,14 +535,14 @@ getBranchMsg = async (value) => {
                     if (cacheRow) {
                         if (!cacheRow.qiniu) {
                             console.log(1, 'qiniu create')
-                            await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                            formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                            // await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                            // formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                         } else {
                             for (let x = 0; x < data.length; x++) {
                                 if (data[x]['typeId'] === cacheRow['typeId'] && cacheRow['content'] !== typeObj[item]['content']) {
-                                    await deleteData(item)
-                                    await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                                    formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                                    // await deleteData(item)
+                                    // await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                                    // formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                                     console.log('qiniu update')
                                     break;
                                 }
@@ -547,8 +550,8 @@ getBranchMsg = async (value) => {
                         }
                     } else {
                         console.log(3, 'qiniu create')
-                        await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
-                        formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
+                        // await page.screenshot({ path: `./utils/img/${item}.png`, fullPage: true });
+                        // formUploader(item, `D:\\github\\autoJs\\electronChanDao\\utils\\img\\${item}.png`)
                     }
                     typeObj[item]['qiniu'] = true
                 } catch (e) {
@@ -575,6 +578,7 @@ getBranchMsg = async (value) => {
                         item.titleSelf = typeObj[item.typeId]['title']
                         item.qiniu = typeObj[item.typeId]['qiniu']
                         item.type += '--' + typeObj[item.typeId]['rank']
+                        item.bugBranch = typeObj[item.typeId]['bugBranch']
                     }
                 })
                 store.set('chandao-BugStatus', data)
