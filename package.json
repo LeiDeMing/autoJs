@@ -18,7 +18,7 @@
     "connect-redis": "^3.4.1",
     "ejs": "^2.6.1",
     "electron-store": "^5.1.1",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "express-session": "^1.15.6",
     "fs": "0.0.1-security",
     "ioredis": "^4.6.2",
